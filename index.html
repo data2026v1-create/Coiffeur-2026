@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" dir="ltr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Rachid MGH — Barber Pro DZ</title>
+<title>BARBER PRO DZ — Business Suite</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -18,27 +18,43 @@
   --radius:14px; --radius-sm:8px;
   --font-display:'Playfair Display',serif; --font-body:'Inter',sans-serif; --font-mono:'JetBrains Mono',monospace;
 }
+
+[data-theme="light"] {
+  --bg:#f4f4f6; --bg-elev:#ffffff; --card:#ffffff; --card-hover:#f0f0f4; --border:#e2e2e8;
+  --gold:#b88e14; --gold-light:#d4a827; --gold-dim:rgba(184,142,20,.12);
+  --text:#1a1a1e; --text-muted:#666670; --text-dim:#9999a0;
+}
+
+[dir="rtl"] {
+  --font-body: 'Cairo', sans-serif;
+  --font-display: 'Cairo', sans-serif;
+}
+
 *{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
-body{background:var(--bg);color:var(--text);font-family:var(--font-body);overflow-x:hidden;padding-bottom:40px;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);overflow-x:hidden;padding-bottom:40px;transition:background 0.3s, color 0.3s;}
 .conteneur{max-width:1200px;margin:0 auto;padding:0 20px;}
 .masque{display:none !important;}
 ::selection{background:var(--gold);color:#000;}
 ::-webkit-scrollbar{height:6px;width:8px;}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px;}
 
-header{height:70px;border-bottom:1px solid var(--border);display:flex;align-items:center;background:rgba(10,10,12,.85);backdrop-filter:blur(14px);position:sticky;top:0;z-index:1000;}
+/* ===== HEADER ===== */
+header{height:70px;border-bottom:1px solid var(--border);display:flex;align-items:center;background:var(--bg-elev);backdrop-filter:blur(14px);position:sticky;top:0;z-index:1000;}
 .nav-content{display:flex;justify-content:space-between;align-items:center;width:100%;}
-.logo{font-family:var(--font-display);font-size:1.4rem;display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;letter-spacing:.3px;}
+.logo{font-family:var(--font-display);font-size:1.4rem;display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);letter-spacing:.3px;}
 .logo i{color:var(--gold);}
 .nav-menu{display:flex;gap:8px;align-items:center;}
 .nav-link{color:var(--text-muted);text-decoration:none;font-size:.85rem;font-weight:600;cursor:pointer;padding:8px 14px;border-radius:999px;transition:.2s;display:flex;align-items:center;gap:6px;}
 .nav-link.active{color:#000;background:var(--gold);}
 .nav-link:not(.active):hover{color:var(--gold-light);background:var(--gold-dim);}
+.control-btn{background:var(--card);border:1px solid var(--border);color:var(--text);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:0.2s;}
+.control-btn:hover{border-color:var(--gold);color:var(--gold);}
 #status-cloud{font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);letter-spacing:1px;display:flex;align-items:center;gap:6px;}
 .dot-pulse{width:6px;height:6px;border-radius:50%;background:var(--success);box-shadow:0 0 0 0 rgba(52,211,153,.6);animation:pulse 2s infinite;}
 @keyframes pulse{70%{box-shadow:0 0 0 6px rgba(52,211,153,0);}100%{box-shadow:0 0 0 0 rgba(52,211,153,0);}}
 
+/* ===== BUTTONS ===== */
 .btn{padding:11px 20px;border-radius:9px;border:1px solid transparent;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;font-size:.85rem;transition:.2s;font-family:var(--font-body);}
 .btn-primary{background:var(--gold);color:#000;}
 .btn-primary:hover{background:var(--gold-light);transform:translateY(-1px);}
@@ -51,29 +67,36 @@ header{height:70px;border-bottom:1px solid var(--border);display:flex;align-item
 .btn-ghost{background:transparent;border:none;color:var(--text-muted);}
 .btn-ghost:hover{color:var(--text);}
 
+/* ===== KPI ===== */
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:30px;}
 .kpi-card{background:var(--card);padding:20px 22px;border-radius:var(--radius);border:1px solid var(--border);position:relative;overflow:hidden;}
 .kpi-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--gold);opacity:.6;}
+[dir="rtl"] .kpi-card::before{left:auto;right:0;}
 .kpi-val{font-family:var(--font-mono);font-size:1.9rem;font-weight:700;margin:8px 0;color:var(--gold-light);}
 .kpi-label{color:var(--text-muted);font-size:.72rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;}
 .kpi-sub{font-size:.78rem;color:var(--text-muted);font-family:var(--font-mono);}
 
+/* ===== SERVICE CARDS ===== */
 .service-card{background:var(--card);border:1px solid var(--border);padding:18px;border-radius:var(--radius-sm);cursor:pointer;transition:.15s;position:relative;}
 .service-card:hover{border-color:var(--gold);}
 .service-card.selected{border-color:var(--gold);background:var(--gold-dim);box-shadow:0 0 0 1px var(--gold) inset;}
 .service-card .chk{position:absolute;top:14px;right:14px;width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;transition:.15s;}
+[dir="rtl"] .service-card .chk{right:auto;left:14px;}
 .service-card.selected .chk{background:var(--gold);border-color:var(--gold);}
 .service-card.selected .chk i{color:#000;font-size:.65rem;}
 .service-card h4{font-size:1rem;margin-bottom:6px;padding-right:26px;}
+[dir="rtl"] .service-card h4{padding-right:0;padding-left:26px;}
 .service-price{font-family:var(--font-mono);color:var(--gold);font-weight:700;font-size:1.05rem;}
 .service-duree{color:var(--text-muted);font-size:.78rem;}
 
+/* BARBER CARD */
 .barber-card{background:var(--card);border:1px solid var(--border);padding:20px;border-radius:var(--radius-sm);cursor:pointer;text-align:center;transition:.15s;}
 .barber-card:hover{border-color:var(--gold);}
 .barber-card.selected{border-color:var(--gold);background:var(--gold-dim);}
 .barber-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-light));display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-family:var(--font-display);font-weight:700;color:#000;font-size:1.3rem;overflow:hidden;}
 .barber-avatar img{width:100%;height:100%;object-fit:cover;}
 
+/* GALLERY */
 .gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin:30px 0;}
 .gallery-item{aspect-ratio:1;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);position:relative;background:var(--bg-elev);}
 .gallery-item img{width:100%;height:100%;object-fit:cover;transition:transform .3s;}
@@ -83,6 +106,7 @@ header{height:70px;border-bottom:1px solid var(--border);display:flex;align-item
 .about-section p{color:var(--text-muted);line-height:1.6;max-width:600px;margin:0 auto;}
 .site-footer{text-align:center;padding:20px 0 40px;color:var(--text-dim);font-size:.8rem;}
 
+/* ===== STEPPER ===== */
 .stepper{display:flex;justify-content:center;gap:6px;margin-bottom:36px;flex-wrap:wrap;}
 .step-pill{font-family:var(--font-mono);font-size:.7rem;padding:7px 14px;border-radius:999px;border:1px solid var(--border);color:var(--text-dim);letter-spacing:.5px;display:flex;align-items:center;gap:6px;transition:.2s;}
 .step-pill.active{border-color:var(--gold);color:var(--gold-light);background:var(--gold-dim);}
@@ -90,6 +114,7 @@ header{height:70px;border-bottom:1px solid var(--border);display:flex;align-item
 .step-pill.done:hover{background:rgba(52,211,153,.1);border-color:var(--success);}
 .step-connector{width:20px;height:1px;background:var(--border);align-self:center;}
 
+/* ===== CALENDAR / TIME ===== */
 .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .calendar-title { font-family: var(--font-display); font-weight: 700; font-size: 1.2rem; text-transform: capitalize; }
 .calendar-nav { display: flex; gap: 8px; }
@@ -99,17 +124,18 @@ header{height:70px;border-bottom:1px solid var(--border);display:flex;align-item
 .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 24px; }
 .calendar-day-name { text-align: center; font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 8px; letter-spacing: 1px; }
 .calendar-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.95rem; cursor: pointer; transition: 0.15s; }
-.calendar-day:hover:not(.disabled):not(.empty) { border-color: var(--gold); background: var(--gold-dim); }
+.calendar-day:hover:not(.disabled) { border-color: var(--gold); }
 .calendar-day.selected { background: var(--gold); border-color: var(--gold); color: #000; font-weight: 700; }
-.calendar-day.disabled { opacity: 0.2; cursor: not-allowed; background: transparent; text-decoration: line-through; }
+.calendar-day.disabled { opacity: 0.25; cursor: not-allowed; background: transparent; text-decoration: line-through; }
 .calendar-day.empty { background: transparent; border-color: transparent; cursor: default; }
-.time-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px;margin-top:10px;}
+.time-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px;}
 .time-chip{font-family:var(--font-mono);background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;text-align:center;cursor:pointer;font-size:.85rem;transition:.15s;}
-.time-chip:hover:not(.taken){border-color:var(--gold);background:var(--gold-dim);}
+.time-chip:hover{border-color:var(--gold);}
 .time-chip.selected{background:var(--gold);color:#000;border-color:var(--gold);font-weight:700;}
 .time-chip.taken{opacity:.3;text-decoration:line-through;cursor:not-allowed;}
 
-.ticket-bar{position:fixed;bottom:0;left:0;right:0;background:var(--bg-elev);border-top:1px dashed var(--border);z-index:900;transform:translateY(100%);transition:transform .3s ease;box-shadow:0 -10px 30px rgba(0,0,0,.4);}
+/* ===== TICKET BAR ===== */
+.ticket-bar{position:fixed;bottom:0;left:0;right:0;background:var(--bg-elev);border-top:1px dashed var(--border);z-index:900;transform:translateY(100%);transition:transform .3s ease;box-shadow:0 -10px 30px rgba(0,0,0,.15);}
 .ticket-bar.show{transform:translateY(0);}
 .ticket-inner{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;flex-wrap:wrap;gap:12px;}
 .ticket-info{display:flex;flex-direction:column;}
@@ -117,6 +143,7 @@ header{height:70px;border-bottom:1px solid var(--border);display:flex;align-item
 .ticket-info .val{font-family:var(--font-mono);font-size:1.3rem;color:var(--gold-light);font-weight:700;}
 .ticket-actions{display:flex;gap:10px;}
 
+/* ===== FORMS & TABLES ===== */
 .form-group{margin-bottom:16px;}
 .form-label{display:block;font-size:.78rem;color:var(--text-muted);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
 .form-input,.form-select{width:100%;background:var(--bg-elev);border:1px solid var(--border);color:var(--text);padding:12px 14px;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:.9rem;}
@@ -129,21 +156,20 @@ header{height:70px;border-bottom:1px solid var(--border);display:flex;align-item
 .table-container{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;}
 .table-scroll{overflow-x:auto;}
 table{width:100%;border-collapse:collapse;text-align:left;font-size:.85rem;min-width:640px;}
+[dir="rtl"] table{text-align:right;}
 th{background:var(--bg-elev);padding:14px 16px;color:var(--text-muted);font-weight:600;font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;}
 td{padding:14px 16px;border-top:1px solid var(--border);vertical-align:middle;}
 .status{padding:4px 10px;border-radius:999px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
 .status-confirme{background:rgba(52,211,153,.12);color:var(--success);}
 .status-attente{background:rgba(251,191,36,.12);color:var(--warning);}
 .status-annule{background:rgba(248,113,113,.12);color:var(--danger);}
-.empty-row{text-align:center;padding:40px !important;color:var(--text-dim);}
 
+/* ===== ADMIN TABS & MODAL ===== */
 .admin-tabs{display:flex;gap:6px;margin-bottom:26px;border-bottom:1px solid var(--border);overflow-x:auto;}
 .admin-tab{padding:12px 18px;font-size:.85rem;font-weight:600;color:var(--text-muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:.15s;}
 .admin-tab.active{color:var(--gold-light);border-color:var(--gold);}
-.admin-tab:hover:not(.active){color:var(--text);}
 .panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
 .list-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 18px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
-.list-card .meta{color:var(--text-muted);font-size:.78rem;font-family:var(--font-mono);}
 
 #modal-root{position:fixed;inset:0;z-index:3000;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);}
 .modal-box{background:var(--bg-elev);border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:440px;padding:26px;animation:modalIn .18s ease;}
@@ -159,10 +185,8 @@ td{padding:14px 16px;border-top:1px solid var(--border);vertical-align:middle;}
 .hero p{color:var(--text-muted);margin-top:10px;}
 .step-title{font-size:1.15rem;margin-bottom:18px;display:flex;align-items:center;gap:10px;}
 .step-title .num{font-family:var(--font-mono);color:var(--gold);}
-.step-nav{display:flex;justify-content:space-between;margin-top:26px;}
 .confirm-card{background:var(--card);border:1px dashed var(--border);border-radius:var(--radius);padding:24px;}
 .confirm-line{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:.9rem;}
-.confirm-line:last-child{border:none;}
 .success-box{text-align:center;padding:60px 20px;}
 .success-icon{width:70px;height:70px;border-radius:50%;background:var(--gold-dim);border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:1.6rem;color:var(--gold);}
 
@@ -174,90 +198,91 @@ td{padding:14px 16px;border-top:1px solid var(--border);vertical-align:middle;}
   .nav-link span.lbl{display:none;}
   .hero h1{font-size:1.9rem;}
   .form-row{grid-template-columns:1fr;}
-  th,td{padding:10px 12px;font-size:.78rem;}
 }
 </style>
 </head>
-<body>
+<body data-theme="dark">
 
 <div id="loader"><div class="loader-spin"></div></div>
 <div id="modal-root" class="masque"></div>
 
 <header>
   <div class="conteneur nav-content">
-    <a href="#" class="logo"><i class="fa-solid fa-scissors"></i><span id="brand-name">RACHID MGH</span></a>
+    <a href="#" class="logo"><i class="fa-solid fa-scissors"></i><span id="brand-name">BARBER PRO DZ</span></a>
     <nav class="nav-menu">
-      <div class="nav-link active" id="tab-client" onclick="switchMode('client')"><i class="fa-solid fa-calendar-check"></i><span class="lbl">Réserver</span></div>
-      <div class="nav-link" id="tab-admin" onclick="switchMode('admin')"><i class="fa-solid fa-lock"></i><span class="lbl">Admin</span></div>
+      <div class="nav-link active" id="tab-client" onclick="switchMode('client')"><i class="fa-solid fa-calendar-check"></i><span class="lbl" data-i18n="reserver">Réserver</span></div>
+      <div class="nav-link" id="tab-admin" onclick="switchMode('admin')"><i class="fa-solid fa-lock"></i><span class="lbl" data-i18n="admin">Admin</span></div>
+      <button class="control-btn" id="theme-toggle" onclick="toggleTheme()"><i class="fa-solid fa-sun"></i></button>
+      <button class="control-btn" id="lang-toggle" onclick="toggleLang()">AR</button>
     </nav>
-    <div id="status-cloud"><span class="dot-pulse"></span> SYNC ACTIVE</div>
+    <div id="status-cloud"><span class="dot-pulse"></span> <span data-i18n="sync">SYNC ACTIVE</span></div>
   </div>
 </header>
 
 <!-- ================= CLIENT ================= -->
 <main id="client-view" class="conteneur">
   <div class="hero">
-    <div class="eyebrow">Réservation en ligne</div>
+    <div class="eyebrow" data-i18n="hero_eyebrow">Réservation en ligne</div>
     <h1 id="hero-title">Réservez votre style</h1>
-    <p id="hero-sub">Synchronisation instantanée avec le salon</p>
+    <p id="hero-sub" data-i18n="hero_sub">Synchronisation instantanée avec le salon</p>
   </div>
 
   <div class="stepper" id="stepper"></div>
 
   <div id="c-step-1">
-    <div class="step-title"><span class="num">01</span> Choisissez vos prestations</div>
+    <div class="step-title"><span class="num">01</span> <span data-i18n="step1_title">Choisissez vos prestations</span></div>
     <div class="kpi-grid" id="grid-services-client"></div>
   </div>
 
   <div id="c-step-2" class="masque">
-    <div class="step-title"><span class="num">02</span> Choisissez votre coiffeur</div>
+    <div class="step-title"><span class="num">02</span> <span data-i18n="step2_title">Choisissez votre coiffeur</span></div>
     <div class="kpi-grid" id="grid-coiffeurs-client"></div>
   </div>
 
   <div id="c-step-3" class="masque">
-    <div class="step-title"><span class="num">03</span> Choisissez date &amp; heure</div>
+    <div class="step-title"><span class="num">03</span> <span data-i18n="step3_title">Choisissez date & heure</span></div>
     <div id="calendar-wrapper"></div>
     <div class="time-grid" id="time-grid"></div>
   </div>
 
   <div id="c-step-4" class="masque">
-    <div class="step-title"><span class="num">04</span> Vos coordonnées</div>
+    <div class="step-title"><span class="num">04</span> <span data-i18n="step4_title">Vos coordonnées</span></div>
     <div style="max-width:420px;">
       <div class="form-group">
-        <label class="form-label">Nom complet</label>
+        <label class="form-label" data-i18n="nom_complet">Nom complet</label>
         <input class="form-input" id="input-nom" placeholder="Ex: Karim Benziane" oninput="validateStep4()" onkeydown="if(event.key==='Enter') document.getElementById('input-tel').focus()">
       </div>
       <div class="form-group">
-        <label class="form-label">Téléphone</label>
+        <label class="form-label" data-i18n="telephone">Téléphone</label>
         <input class="form-input" id="input-tel" placeholder="Ex: 0555 12 34 56" oninput="validateStep4()" onkeydown="if(event.key==='Enter' && stepIsValid(4)) nextStep()">
       </div>
     </div>
   </div>
 
   <div id="c-step-5" class="masque">
-    <div class="step-title"><span class="num">05</span> Confirmez votre réservation</div>
+    <div class="step-title"><span class="num">05</span> <span data-i18n="step5_title">Confirmez votre réservation</span></div>
     <div class="confirm-card" id="confirm-recap"></div>
   </div>
 
   <div id="c-step-success" class="masque success-box">
     <div class="success-icon"><i class="fa-solid fa-check"></i></div>
-    <h2 style="font-family:var(--font-display);font-size:1.7rem;margin-bottom:10px;">Réservation envoyée</h2>
+    <h2 style="font-family:var(--font-display);font-size:1.7rem;margin-bottom:10px;" data-i18n="res_envoyee">Réservation envoyée</h2>
     <p style="color:var(--text-muted);margin-bottom:22px;" id="success-ref">Le salon confirmera votre rendez-vous sous peu.</p>
-    <button class="btn btn-primary" onclick="window.resetBooking()"><i class="fa-solid fa-rotate-left"></i> Nouvelle réservation</button>
+    <button class="btn btn-primary" onclick="window.resetBooking()"><i class="fa-solid fa-rotate-left"></i> <span data-i18n="nouvelle_res">Nouvelle réservation</span></button>
   </div>
 
   <div id="client-gallery-section" class="masque">
-    <div class="section-title" style="margin-top:60px; font-size:1.4rem;">Notre Galerie</div>
+    <div class="section-title" style="margin-top:60px; font-size:1.4rem;" data-i18n="notre_galerie">Notre Galerie</div>
     <div class="gallery-grid" id="client-gallery"></div>
   </div>
 
   <div class="about-section">
-    <h2 id="about-title">À propos de notre salon</h2>
-    <p id="about-text">Bienvenue chez Rachid MGH Pro DZ, votre salon de coiffure de référence.</p>
+    <h2 id="about-title">À propos</h2>
+    <p id="about-text">Texte à propos...</p>
   </div>
   
   <div class="site-footer" id="site-footer">
-    © 2026 Rachid MGH. Tous droits réservés.
+    © 2026 Barber Pro DZ
   </div>
 </main>
 
@@ -268,8 +293,8 @@ td{padding:14px 16px;border-top:1px solid var(--border);vertical-align:middle;}
       <span class="val" id="ticket-total">0 DA</span>
     </div>
     <div class="ticket-actions">
-      <button class="btn btn-outline btn-sm" id="btn-prev" onclick="prevStep()"><i class="fa-solid fa-arrow-left"></i> Retour</button>
-      <button class="btn btn-primary" id="btn-next" onclick="nextStep()">Continuer <i class="fa-solid fa-arrow-right"></i></button>
+      <button class="btn btn-outline btn-sm" id="btn-prev" onclick="prevStep()"><i class="fa-solid fa-arrow-left"></i> <span data-i18n="retour">Retour</span></button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextStep()"><span data-i18n="continuer">Continuer</span> <i class="fa-solid fa-arrow-right"></i></button>
     </div>
   </div>
 </div>
@@ -278,284 +303,308 @@ td{padding:14px 16px;border-top:1px solid var(--border);vertical-align:middle;}
 <main id="admin-view" class="conteneur masque" style="padding-top:30px;">
   <div class="panel-head">
     <div>
-      <div class="section-title">Dashboard Analytique</div>
+      <div class="section-title" data-i18n="dashboard">Dashboard Analytique</div>
       <div class="section-sub" id="admin-salon-name">—</div>
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn btn-outline" onclick="exportData()"><i class="fa-solid fa-download"></i> CSV</button>
-      <button class="btn btn-outline" onclick="switchMode('client')"><i class="fa-solid fa-eye"></i> Vue Client</button>
+      <button class="btn btn-outline" onclick="switchMode('client')"><i class="fa-solid fa-eye"></i> <span data-i18n="vue_client">Vue Client</span></button>
     </div>
   </div>
 
   <div class="admin-tabs">
-    <div class="admin-tab active" data-tab="dashboard" onclick="switchAdminTab('dashboard')">Dashboard</div>
-    <div class="admin-tab" data-tab="reservations" onclick="switchAdminTab('reservations')">Réservations</div>
-    <div class="admin-tab" data-tab="services" onclick="switchAdminTab('services')">Services</div>
-    <div class="admin-tab" data-tab="coiffeurs" onclick="switchAdminTab('coiffeurs')">Coiffeurs</div>
-    <div class="admin-tab" data-tab="galerie" onclick="switchAdminTab('galerie')">Galerie</div>
-    <div class="admin-tab" data-tab="parametres" onclick="switchAdminTab('parametres')">Paramètres</div>
+    <div class="admin-tab active" data-tab="dashboard" onclick="switchAdminTab('dashboard')" data-i18n="dashboard">Dashboard</div>
+    <div class="admin-tab" data-tab="reservations" onclick="switchAdminTab('reservations')" data-i18n="reservations">Réservations</div>
+    <div class="admin-tab" data-tab="services" onclick="switchAdminTab('services')" data-i18n="services">Services</div>
+    <div class="admin-tab" data-tab="coiffeurs" onclick="switchAdminTab('coiffeurs')" data-i18n="coiffeurs">Coiffeurs</div>
+    <div class="admin-tab" data-tab="galerie" onclick="switchAdminTab('galerie')" data-i18n="galerie">Galerie</div>
+    <div class="admin-tab" data-tab="parametres" onclick="switchAdminTab('parametres')" data-i18n="parametres">Paramètres</div>
   </div>
 
+  <!-- DASHBOARD -->
   <div id="panel-dashboard" class="admin-panel">
     <div class="kpi-grid">
-      <div class="kpi-card"><div class="kpi-label">Chiffre d'affaires</div><div class="kpi-val" id="kpi-ca">0 DA</div></div>
-      <div class="kpi-card"><div class="kpi-label">Rendez-vous total</div><div class="kpi-val" id="kpi-total">0</div><div class="kpi-sub" id="kpi-attente">0 en attente</div></div>
-      <div class="kpi-card"><div class="kpi-label">Top service</div><div class="kpi-val" id="kpi-top" style="font-size:1.1rem;">...</div></div>
-      <div class="kpi-card"><div class="kpi-label">Coiffeurs actifs</div><div class="kpi-val" id="kpi-coiffeurs">0</div></div>
+      <div class="kpi-card"><div class="kpi-label" data-i18n="ca">Chiffre d'affaires</div><div class="kpi-val" id="kpi-ca">0 DA</div></div>
+      <div class="kpi-card"><div class="kpi-label" data-i18n="rdv_total">Rendez-vous total</div><div class="kpi-val" id="kpi-total">0</div><div class="kpi-sub" id="kpi-attente">0 en attente</div></div>
+      <div class="kpi-card"><div class="kpi-label" data-i18n="top_service">Top service</div><div class="kpi-val" id="kpi-top" style="font-size:1.1rem;">...</div></div>
+      <div class="kpi-card"><div class="kpi-label" data-i18n="coiffeurs_actifs">Coiffeurs actifs</div><div class="kpi-val" id="kpi-coiffeurs">0</div></div>
     </div>
     <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;" id="dash-grid">
       <div class="table-container">
-        <div style="padding:15px 18px;font-weight:700;border-bottom:1px solid var(--border);">Dernières réservations</div>
+        <div style="padding:15px 18px;font-weight:700;border-bottom:1px solid var(--border);" data-i18n="dernieres_res">Dernières réservations</div>
         <div class="table-scroll"><table>
-          <thead><tr><th>Client</th><th>Service</th><th>Date & Heure</th><th>Prix</th><th>Statut</th></tr></thead>
+          <thead><tr><th data-i18n="client">Client</th><th data-i18n="service">Service</th><th data-i18n="date_heure">Date & Heure</th><th data-i18n="prix">Prix</th><th data-i18n="statut">Statut</th></tr></thead>
           <tbody id="dash-table-body"></tbody>
         </table></div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label" style="margin-bottom:15px;">Volume d'activité</div>
+        <div class="kpi-label" style="margin-bottom:15px;" data-i18n="volume_activite">Volume d'activité</div>
         <canvas id="chartActivity"></canvas>
       </div>
     </div>
   </div>
 
+  <!-- RESERVATIONS -->
   <div id="panel-reservations" class="admin-panel masque">
     <div class="panel-head">
       <div style="display:flex;gap:10px;">
         <select class="form-select" id="filter-statut" style="width:auto;" onchange="renderReservationsTable()">
-          <option value="">Tous les statuts</option>
-          <option value="attente">En attente</option>
-          <option value="confirme">Confirmé</option>
-          <option value="annule">Annulé</option>
+          <option value="" data-i18n="tous_statuts">Tous les statuts</option>
+          <option value="attente" data-i18n="attente">En attente</option>
+          <option value="confirme" data-i18n="confirme">Confirmé</option>
+          <option value="annule" data-i18n="annule">Annulé</option>
         </select>
-        <input class="form-input" id="filter-search" placeholder="Rechercher un client..." style="width:220px;" oninput="renderReservationsTable()">
+        <input class="form-input" id="filter-search" placeholder="Rechercher..." style="width:220px;" oninput="renderReservationsTable()">
       </div>
     </div>
     <div class="table-container">
       <div class="table-scroll"><table>
-        <thead><tr><th>Client</th><th>Service</th><th>Coiffeur</th><th>Date & Heure</th><th>Prix</th><th>Statut</th><th>Action</th></tr></thead>
+        <thead><tr><th data-i18n="client">Client</th><th data-i18n="service">Service</th><th data-i18n="coiffeurs">Coiffeur</th><th data-i18n="date_heure">Date & Heure</th><th data-i18n="prix">Prix</th><th data-i18n="statut">Statut</th><th>Action</th></tr></thead>
         <tbody id="admin-table-body"></tbody>
       </table></div>
     </div>
   </div>
 
+  <!-- SERVICES -->
   <div id="panel-services" class="admin-panel masque">
     <div class="panel-head">
-      <div class="section-sub" style="margin:0;">Gérez les prestations proposées aux clients</div>
-      <button class="btn btn-primary" onclick="openServiceModal()"><i class="fa-solid fa-plus"></i> Nouveau service</button>
+      <div class="section-sub" style="margin:0;" data-i18n="gerer_services">Gérez les prestations proposées</div>
+      <button class="btn btn-primary" onclick="openServiceModal()"><i class="fa-solid fa-plus"></i> <span data-i18n="nouveau_service">Nouveau service</span></button>
     </div>
     <div id="services-list"></div>
   </div>
 
+  <!-- COIFFEURS -->
   <div id="panel-coiffeurs" class="admin-panel masque">
     <div class="panel-head">
-      <div class="section-sub" style="margin:0;">Gérez l'équipe de coiffeurs</div>
-      <button class="btn btn-primary" onclick="openCoiffeurModal()"><i class="fa-solid fa-plus"></i> Nouveau coiffeur</button>
+      <div class="section-sub" style="margin:0;" data-i18n="gerer_coiffeurs">Gérez l'équipe de coiffeurs</div>
+      <button class="btn btn-primary" onclick="openCoiffeurModal()"><i class="fa-solid fa-plus"></i> <span data-i18n="nouveau_coiffeur">Nouveau coiffeur</span></button>
     </div>
     <div id="coiffeurs-list"></div>
   </div>
 
+  <!-- GALERIE -->
   <div id="panel-galerie" class="admin-panel masque">
     <div class="panel-head">
-      <div class="section-sub" style="margin:0;">Gérez les photos de votre salon</div>
-      <button class="btn btn-primary" onclick="openGalerieModal()"><i class="fa-solid fa-plus"></i> Ajouter une photo</button>
+      <div class="section-sub" style="margin:0;" data-i18n="gerer_galerie">Gérez les photos du salon</div>
+      <button class="btn btn-primary" onclick="openGalerieModal()"><i class="fa-solid fa-plus"></i> <span data-i18n="ajouter_photo">Ajouter une photo</span></button>
     </div>
-    <div class="gallery-grid gallery-admin-item" id="galerie-list"></div>
+    <div class="gallery-grid" id="galerie-list"></div>
   </div>
 
+  <!-- PARAMETRES -->
   <div id="panel-parametres" class="admin-panel masque">
-    <div class="section-sub" style="margin:0 0 20px;">Ces réglages pilotent dynamiquement l'affichage client (nom, horaires, créneaux, devise)</div>
+    <div class="section-sub" style="margin:0 0 20px;" data-i18n="settings_info">Ces réglages pilotent dynamiquement l'affichage client</div>
     <div style="max-width:560px;">
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Nom du salon</label><input class="form-input" id="set-nom"></div>
-        <div class="form-group"><label class="form-label">Devise</label><input class="form-input" id="set-devise" placeholder="DA"></div>
+        <div class="form-group"><label class="form-label" data-i18n="nom_salon">Nom du salon</label><input class="form-input" id="set-nom"></div>
+        <div class="form-group"><label class="form-label" data-i18n="devise">Devise</label><input class="form-input" id="set-devise" placeholder="DA"></div>
       </div>
-      <div class="form-group"><label class="form-label">Adresse</label><input class="form-input" id="set-adresse"></div>
-      <div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" id="set-tel"></div>
+      <div class="form-group"><label class="form-label" data-i18n="adresse">Adresse</label><input class="form-input" id="set-adresse"></div>
+      <div class="form-group"><label class="form-label" data-i18n="telephone">Téléphone</label><input class="form-input" id="set-tel"></div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Heure d'ouverture</label><input type="time" class="form-input" id="set-ouverture"></div>
-        <div class="form-group"><label class="form-label">Heure de fermeture</label><input type="time" class="form-input" id="set-fermeture"></div>
+        <div class="form-group"><label class="form-label" data-i18n="ouverture">Heure d'ouverture</label><input type="time" class="form-input" id="set-ouverture"></div>
+        <div class="form-group"><label class="form-label" data-i18n="fermeture">Heure de fermeture</label><input type="time" class="form-input" id="set-fermeture"></div>
       </div>
-      <div class="form-group"><label class="form-label">Durée d'un créneau (minutes)</label><input type="number" min="10" step="5" class="form-input" id="set-duree" style="max-width:160px;"></div>
+      <div class="form-group"><label class="form-label" data-i18n="duree_slot">Durée d'un créneau (minutes)</label><input type="number" min="10" step="5" class="form-input" id="set-duree" style="max-width:160px;"></div>
       <div class="form-group">
-        <label class="form-label">Jours de fermeture</label>
+        <label class="form-label" data-i18n="jours_fermeture">Jours de fermeture</label>
         <div class="form-check-row" id="set-jours"></div>
       </div>
       <div style="border-top:1px solid var(--border); margin:20px 0; padding-top:20px;">
-        <div class="form-group"><label class="form-label">Titre section "À propos"</label><input class="form-input" id="set-about-title"></div>
-        <div class="form-group"><label class="form-label">Texte section "À propos"</label><textarea class="form-input" id="set-about-text" rows="3"></textarea></div>
-        <div class="form-group"><label class="form-label">Texte Pied de page (Footer)</label><input class="form-input" id="set-footer"></div>
+        <div class="form-group"><label class="form-label" data-i18n="titre_about">Titre "À propos"</label><input class="form-input" id="set-about-title"></div>
+        <div class="form-group"><label class="form-label" data-i18n="texte_about">Texte "À propos"</label><textarea class="form-input" id="set-about-text" rows="3"></textarea></div>
+        <div class="form-group"><label class="form-label" data-i18n="texte_footer">Pied de page (Footer)</label><input class="form-input" id="set-footer"></div>
       </div>
-      <button class="btn btn-primary" onclick="saveSettings()"><i class="fa-solid fa-floppy-disk"></i> Enregistrer les paramètres</button>
+      <button class="btn btn-primary" onclick="saveSettings()"><i class="fa-solid fa-floppy-disk"></i> <span data-i18n="enregistrer">Enregistrer les paramètres</span></button>
     </div>
   </div>
 </main>
 
 <script>
-// ============================================================
-// RACHID MGH — Application 100% Opérationnelle
-// Contact: 0770938972
-// ============================================================
-
-const API_URL = 'https://script.google.com/macros/s/AKfycbzB8vhbCqQaB40qV50eNSwU04HucuMnm8GsIN1vHhbaX-DEOT8SbhDN6Z_AJzosmqkR/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbziDzhIFfZ9lRnHn7mih26BJfZdPVgKa2UcSNu5qUbpVUpznax5XOvqNQiueC14g3po/exec'; 
 const POLL_MS = 5000;
 
-// ========== DONNÉES DE DÉMONSTRATION ==========
-const DEMO_DATA = {
-  services: [
-    ['SVC-1', { nom: 'Coupe Homme', tarif: 1500, duree: 30 }],
-    ['SVC-2', { nom: 'Coupe + Barbe', tarif: 2500, duree: 45 }],
-    ['SVC-3', { nom: 'Barbe & Moustache', tarif: 1200, duree: 20 }],
-    ['SVC-4', { nom: 'Coloration', tarif: 3500, duree: 60 }],
-    ['SVC-5', { nom: 'Soin Capillaire', tarif: 1800, duree: 40 }]
-  ],
-  coiffeurs: [
-    ['COIF-1', { nom: 'Rachid', specialite: 'Dégradé Expert', image: '' }],
-    ['COIF-2', { nom: 'Karim', specialite: 'Barbe & Style', image: '' }],
-    ['COIF-3', { nom: 'Sofiane', specialite: 'Coiffure Classique', image: '' }]
-  ],
-  galerie: [],
-  reservations: [],
-  settings: {
-    nomSalon: 'Rachid MGH',
-    devise: 'DA',
-    adresse: 'Alger, Algérie',
-    telephone: '0770938972',
-    ouverture: '09:00',
-    fermeture: '20:00',
-    dureeSlot: 30,
-    joursFermeture: [],
-    aboutTitle: 'À propos de notre salon',
-    aboutText: 'Bienvenue chez Rachid MGH Pro DZ, votre salon de coiffure de référence.',
-    footerText: '© 2026 Rachid MGH. Tous droits réservés.'
+// Dictionnaires de traduction Fr / Ar
+const I18N = {
+  fr: {
+    reserver: "Réservier", admin: "Admin", sync: "SYNC ACTIVE", hero_eyebrow: "Réservation en ligne",
+    hero_sub: "Synchronisation instantanée avec le salon", step1_title: "Choisissez vos prestations",
+    step2_title: "Choisissez votre coiffeur", step3_title: "Choisissez date & heure",
+    step4_title: "Vos coordonnées", step5_title: "Confirmez votre réservation",
+    nom_complet: "Nom complet", telephone: "Téléphone", res_envoyee: "Réservation envoyée",
+    nouvelle_res: "Nouvelle réservation", notre_galerie: "Notre Galerie", retour: "Retour",
+    continuer: "Continuer", dashboard: "Dashboard", reservations: "Réservations", services: "Services",
+    coiffeurs: "Coiffeurs", galerie: "Galerie", parametres: "Paramètres", ca: "Chiffre d'affaires",
+    rdv_total: "Rendez-vous total", top_service: "Top service", coiffeurs_actifs: "Coiffeurs actifs",
+    dernieres_res: "Dernières réservations", client: "Client", service: "Service", date_heure: "Date & Heure",
+    prix: "Prix", statut: "Statut", volume_activite: "Volume d'activité", tous_statuts: "Tous les statuts",
+    attente: "En attente", confirme: "Confirmé", annule: "Annulé", gerer_services: "Gérez vos services",
+    nouveau_service: "Nouveau service", gerer_coiffeurs: "Gérez l'équipe", nouveau_coiffeur: "Nouveau coiffeur",
+    gerer_galerie: "Gérez les photos", ajouter_photo: "Ajouter photo", settings_info: "Configuration générale",
+    nom_salon: "Nom du salon", devise: "Devise", adresse: "Adresse", ouverture: "Ouverture", fermeture: "Fermeture",
+    duree_slot: "Créneau (min)", jours_fermeture: "Jours de fermeture", titre_about: "Titre À propos",
+    texte_about: "Texte À propos", texte_footer: "Texte Pied de page", enregistrer: "Enregistrer", vue_client: "Vue Client",
+    sans_pref: "Sans préférence", premier_dispo: "Premier disponible"
+  },
+  ar: {
+    reserver: "حجز", admin: "الإدارة", sync: "مزامنة نشطة", hero_eyebrow: "الحجز عبر الإنترنت",
+    hero_sub: "مزامنة فورية مع الصالون", step1_title: "اختر الخدمات",
+    step2_title: "اختر الحلاق", step3_title: "اختر التاريخ والوقت",
+    step4_title: "معلوماتك الشخصية", step5_title: "تأكيد الحجز",
+    nom_complet: "الاسم الكامل", telephone: "رقم الهاتف", res_envoyee: "تم إرسال الحجز",
+    nouvelle_res: "حجز جديد", notre_galerie: "معرض الصور", retour: "رجوع",
+    continuer: "متابعة", dashboard: "لوحة التحكم", reservations: "الحجوزات", services: "الخدمات",
+    coiffeurs: "الحلاقون", galerie: "المعرض", parametres: "الإعدادات", ca: "رقم الأعمال",
+    rdv_total: "إجمالي المواعيد", top_service: "الخدمة الأكثر طلباً", coiffeurs_actifs: "الحلاقون النشطون",
+    dernieres_res: "أحدث الحجوزات", client: "الزبون", service: "الخدمة", date_heure: "التاريخ والوقت",
+    prix: "السعر", statut: "الحالة", volume_activite: "حجم النشاط", tous_statuts: "جميع الحالات",
+    attente: "قيد الانتظار", confirme: "مؤكد", annule: "ملغى", gerer_services: "إدارة الخدمات",
+    nouveau_service: "خدمة جديدة", gerer_coiffeurs: "إدارة فريق العمل", nouveau_coiffeur: "حلاق جديد",
+    gerer_galerie: "إدارة معرض الصور", ajouter_photo: "إضافة صورة", settings_info: "الإعدادات العامة",
+    nom_salon: "اسم الصالون", devise: "العملة", adresse: "العنوان", ouverture: "وقت الفتح", fermeture: "وقت الإغلاق",
+    duree_slot: "مدة الحصة (دقيقة)", jours_fermeture: "أيام العطلة", titre_about: "عنوان من نحن",
+    texte_about: "نص من نحن", texte_footer: "نص أسفل الصفحة", enregistrer: "حفظ الإعدادات", vue_client: "واجهة الزبون",
+    sans_pref: "بدون تفضيل", premier_dispo: "أول حلاق متاح"
   }
 };
 
-const DEFAULT_SETTINGS = { 
-  nomSalon: 'Rachid MGH', 
-  adresse: 'Alger, Algérie', 
-  telephone: '0770938972', 
-  devise: 'DA', 
-  ouverture: '09:00', 
-  fermeture: '20:00', 
-  dureeSlot: 30, 
-  joursFermeture: [], 
-  aboutTitle: 'À propos de notre salon', 
-  aboutText: 'Bienvenue chez Rachid MGH Pro DZ, votre salon de coiffure de référence.', 
-  footerText: '© 2026 Rachid MGH. Tous droits réservés.' 
-};
+let currentLang = 'fr';
+let currentTheme = 'dark';
 
-const JOURS = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+const DEFAULT_SETTINGS = { nomSalon: 'Barber Pro DZ', adresse: '', telephone: '', devise: 'DA', ouverture: '09:00', fermeture: '20:00', dureeSlot: 30, joursFermeture: [], aboutTitle: 'À propos de notre salon', aboutText: 'Bienvenue chez Barber Pro DZ, votre salon de coiffure de référence.', footerText: '© 2026 Barber Pro DZ. Tous droits réservés.' };
+const JOURS = {
+  fr: ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'],
+  ar: ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت']
+};
 const STATUT_FR_TO_CODE = { 'en attente':'attente', 'confirmé':'confirme', 'confirme':'confirme', 'annulé':'annule', 'annule':'annule' };
 const STATUT_CODE_TO_FR = { attente:'En attente', confirme:'Confirmé', annule:'Annulé' };
 
-let appData = { ...DEMO_DATA };
+let appData = { services: [], coiffeurs: [], reservations: [], galerie: [], settings: { ...DEFAULT_SETTINGS } };
 let firstSync = true;
-
 let booking = { step: 1, services: [], coiffeurId: null, coiffeurNom: null, date: null, heure: null, nom: '', tel: '' };
-let currentMonth = new Date().getMonth();
-let currentYear = new Date().getFullYear();
 
-// ========== APPEL API ==========
-async function apiGet(){
-  try {
-    const res = await fetch(API_URL, { cache: 'no-store' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    if (data && !data.error) return data;
-    throw new Error('API Error');
-  } catch (err) {
-    console.warn('API indisponible, utilisation des données de démonstration');
-    return null;
-  }
+function toggleTheme() {
+  currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  document.body.setAttribute('data-theme', currentTheme);
+  document.getElementById('theme-toggle').innerHTML = currentTheme === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
 }
 
+function toggleLang() {
+  currentLang = currentLang === 'fr' ? 'ar' : 'fr';
+  document.documentElement.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
+  document.documentElement.setAttribute('lang', currentLang);
+  document.getElementById('lang-toggle').textContent = currentLang === 'ar' ? 'FR' : 'AR';
+  
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (I18N[currentLang][key]) el.textContent = I18N[currentLang][key];
+  });
+  
+  applyBranding();
+  renderStepper();
+  renderClientServices();
+  renderClientCoiffeurs();
+  if(booking.step === 3) renderCalendar();
+}
+
+async function apiGet(){ const res = await fetch(API_URL); return res.json(); }
 async function apiPost(action, payload){
-  try {
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action, ...payload })
-    });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    return await res.json();
-  } catch (err) {
-    console.warn('API POST échoué, simulation locale');
-    return { success: true };
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action, ...payload })
+  });
+  return res.json();
+}
+
+function parseFrDate(str){
+  if (!str) return 0;
+  const s = String(str);
+  if (s.includes('T') && s.includes('-')) return new Date(s).getTime();
+  const [d, t] = s.split(' ');
+  if (d && d.includes('-')) {
+    const [year, month, day] = d.split('-').map(Number);
+    const [h, m, sec] = (t||'0:0:0').split(':').map(Number);
+    return new Date(year, (month||1)-1, day, h||0, m||0, sec||0).getTime();
   }
+  const [day, month, year] = (d||'').split('/').map(Number);
+  const [h, m, sec] = (t||'0:0:0').split(':').map(Number);
+  return new Date(year, (month||1)-1, day, h||0, m||0, sec||0).getTime();
+}
+
+function formatTimeSetting(val, defaultVal) {
+  if (val === undefined || val === null || val === '') return defaultVal;
+  const str = String(val).trim();
+  if (!isNaN(Number(str)) && Number(str) > 0 && Number(str) < 1) {
+    const mins = Math.round(Number(str) * 24 * 60);
+    return String(Math.floor(mins / 60)).padStart(2,'0') + ':' + String(mins % 60).padStart(2,'0');
+  }
+  const match = str.match(/(\d{1,2}):(\d{2})/);
+  return match ? String(match[1]).padStart(2,'0') + ':' + match[2] : defaultVal;
+}
+
+function formatImageUrl(url) {
+  if (!url) return '';
+  const str = String(url).trim();
+  const driveMatch = str.match(/\/d\/([a-zA-Z0-9_-]+)/) || str.match(/id=([a-zA-Z0-9_-]+)/);
+  return (str.includes('drive.google.com') && driveMatch) ? `https://drive.google.com/thumbnail?id=${driveMatch[1]}&sz=w1000` : str;
 }
 
 function normalizeData(raw){
-  if (!raw || typeof raw !== 'object') {
-    return { ...DEMO_DATA };
-  }
-  
+  if (!raw || typeof raw !== 'object') raw = {};
   const getVal = (obj, ...keys) => {
     if (!obj) return undefined;
-    const normalize = (str) => String(str).normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
-    const objKeys = Object.keys(obj);
-    for (const key of keys) {
-      const searchKey = normalize(key);
-      const foundKey = objKeys.find(k => normalize(k) === searchKey);
-      if (foundKey !== undefined) return obj[foundKey];
-    }
-    return undefined;
+    const norm = (s) => String(s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
+    const foundKey = Object.keys(obj).find(k => keys.some(key => norm(k) === norm(key)));
+    return foundKey ? obj[foundKey] : undefined;
   };
 
-  const services = (raw.services||[]).length > 0 ? (raw.services||[]).map(r => [String(getVal(r,'id')||''), { nom: getVal(r,'nom')||'', tarif: Number(getVal(r,'tarif', 'prix'))||0, duree: Number(getVal(r,'duree', 'temps'))||0 }]) : DEMO_DATA.services;
-  
-  const coiffeurs = (raw.coiffeurs||[]).length > 0 ? (raw.coiffeurs||[]).map(r => [String(getVal(r,'id')||''), { nom: getVal(r,'nom')||'', specialite: getVal(r,'specialite', 'specialites')||'', image: getVal(r,'image', 'photo', 'url')||'' }]) : DEMO_DATA.coiffeurs;
-  
-  const galerie = (raw.galerie||[]).length > 0 ? (raw.galerie||[]).map(r => [String(getVal(r,'id')||''), { url: getVal(r,'url', 'image', 'photo')||'' }]) : DEMO_DATA.galerie;
-  
-  const reservations = (raw.reservations||[]).length > 0 ? (raw.reservations||[]).map(r => {
+  const services = (raw.services||[]).map(r => [String(getVal(r,'id')||''), { nom: getVal(r,'nom')||'', tarif: Number(getVal(r,'tarif', 'prix'))||0, duree: Number(getVal(r,'duree', 'temps'))||0 }]);
+  const coiffeurs = (raw.coiffeurs||[]).map(r => [String(getVal(r,'id')||''), { nom: getVal(r,'nom')||'', specialite: getVal(r,'specialite', 'specialites')||'', image: formatImageUrl(getVal(r,'image', 'photo', 'url')||'') }]);
+  const galerie = (raw.galerie||[]).map(r => [String(getVal(r,'id')||''), { url: formatImageUrl(getVal(r,'url', 'image', 'photo')||'') }]);
+  const reservations = (raw.reservations||[]).map(r => {
     const statutFr = String(getVal(r,'statut', 'status')||'En attente').trim().toLowerCase();
     let dateVal = getVal(r,'date');
     if (dateVal && String(dateVal).includes('T')) dateVal = String(dateVal).split('T')[0];
     let heureVal = getVal(r,'heure');
     if (heureVal && String(heureVal).includes('T')) {
-      const timeMatch = String(heureVal).match(/T(\d{2}:\d{2})/);
-      if (timeMatch) heureVal = timeMatch[1];
+       const m = String(heureVal).match(/T(\d{2}:\d{2})/);
+       if (m) heureVal = m[1];
     }
     return [String(getVal(r,'id')||''), {
       clientNom: getVal(r,'nom', 'client')||'', clientTel: getVal(r,'telephone', 'tel')||'',
       prestations: String(getVal(r,'service', 'services', 'prestation')||'').split(' + ').filter(Boolean).map(nom => ({ nom, tarif:0, duree:0 })),
-      coiffeurNom: getVal(r,'coiffeur', 'coiffeurs') || '',
+      coiffeurId: null, coiffeurNom: getVal(r,'coiffeur', 'coiffeurs') || '',
       date: dateVal, heure: heureVal, total: Number(getVal(r,'prix', 'total'))||0,
       statut: STATUT_FR_TO_CODE[statutFr] || 'attente',
-      creeLe: Date.now()
+      creeLe: parseFrDate(getVal(r,'date creation', 'date de creation', 'creation'))
     }];
-  }) : DEMO_DATA.reservations;
-  
+  });
   const p = raw.parametres || {};
   const settings = {
-    nomSalon: getVal(p, 'nomsalon') || p.nomSalon || DEMO_DATA.settings.nomSalon,
-    devise: getVal(p, 'devise') || p.devise || DEMO_DATA.settings.devise,
-    adresse: getVal(p, 'adresse') || p.adresse || DEMO_DATA.settings.adresse,
-    telephone: getVal(p, 'telephone', 'tel') || p.telephone || DEMO_DATA.settings.telephone,
-    ouverture: getVal(p, 'ouverture') || p.ouverture || DEMO_DATA.settings.ouverture,
-    fermeture: getVal(p, 'fermeture') || p.fermeture || DEMO_DATA.settings.fermeture,
-    dureeSlot: Number(getVal(p, 'dureeslot') || p.dureeSlot) || DEMO_DATA.settings.dureeSlot,
+    nomSalon: getVal(p, 'nomsalon') || p.nomSalon || DEFAULT_SETTINGS.nomSalon,
+    devise: getVal(p, 'devise') || p.devise || DEFAULT_SETTINGS.devise,
+    adresse: getVal(p, 'adresse') || p.adresse || '',
+    telephone: getVal(p, 'telephone', 'tel') || p.telephone || '',
+    ouverture: formatTimeSetting(getVal(p, 'ouverture') || p.ouverture, DEFAULT_SETTINGS.ouverture),
+    fermeture: formatTimeSetting(getVal(p, 'fermeture') || p.fermeture, DEFAULT_SETTINGS.fermeture),
+    dureeSlot: Number(getVal(p, 'dureeslot') || p.dureeSlot) || DEFAULT_SETTINGS.dureeSlot,
     joursFermeture: String(getVal(p, 'joursfermeture') || p.joursFermeture || '').split(',').filter(x=>x!=='').map(Number),
-    aboutTitle: getVal(p, 'abouttitle') || p.aboutTitle || DEMO_DATA.settings.aboutTitle,
-    aboutText: getVal(p, 'abouttext') || p.aboutText || DEMO_DATA.settings.aboutText,
-    footerText: getVal(p, 'footertext') || p.footerText || DEMO_DATA.settings.footerText
+    aboutTitle: getVal(p, 'abouttitle') || p.aboutTitle || DEFAULT_SETTINGS.aboutTitle,
+    aboutText: getVal(p, 'abouttext') || p.aboutText || DEFAULT_SETTINGS.aboutText,
+    footerText: getVal(p, 'footertext') || p.footerText || DEFAULT_SETTINGS.footerText
   };
-  
   return { services, coiffeurs, galerie, reservations, settings };
 }
 
 async function syncAndRender(){
   try {
     const raw = await apiGet();
-    if (raw && !raw.error) {
-      appData = normalizeData(raw);
-      document.getElementById('status-cloud').innerHTML = '<span style="color:var(--success);">● SYNC ACTIVE</span>';
-    } else {
-      document.getElementById('status-cloud').innerHTML = '<span style="color:var(--warning);">● MODE DÉMO</span>';
-    }
+    appData = normalizeData(raw);
+    document.getElementById('status-cloud').innerHTML = `<span style="color:var(--success);">● ${I18N[currentLang].sync}</span>`;
   } catch (err) {
-    console.error('Erreur:', err);
-    document.getElementById('status-cloud').innerHTML = '<span style="color:var(--warning);">● MODE DÉMO</span>';
+    document.getElementById('status-cloud').innerHTML = '<span style="color:var(--danger);">● SYNC HORS LIGNE</span>';
   } finally {
     applyBranding();
     renderClientServices();
@@ -568,26 +617,23 @@ async function syncAndRender(){
     renderGalerieAdmin();
     if (firstSync) { fillSettingsForm(); firstSync = false; }
     document.getElementById('loader').classList.add('masque');
-    renderBookingStep();
   }
 }
 
-// Démarrer après un court délai
-setTimeout(syncAndRender, 300);
+syncAndRender();
 setInterval(syncAndRender, POLL_MS);
 
 function money(n){ return `${n} ${appData.settings.devise || 'DA'}`; }
 
 function applyBranding(){
   document.getElementById('brand-name').textContent = appData.settings.nomSalon.toUpperCase();
-  document.getElementById('hero-title').textContent = `Réservez votre style chez ${appData.settings.nomSalon}`;
+  document.getElementById('hero-title').textContent = currentLang === 'ar' ? `احجز جلستك في ${appData.settings.nomSalon}` : `Réservez votre style chez ${appData.settings.nomSalon}`;
   document.getElementById('admin-salon-name').textContent = `${appData.settings.nomSalon} · ${appData.settings.ouverture}–${appData.settings.fermeture}`;
   document.getElementById('about-title').textContent = appData.settings.aboutTitle;
   document.getElementById('about-text').textContent = appData.settings.aboutText;
   document.getElementById('site-footer').textContent = appData.settings.footerText;
 }
 
-// ========== NAVIGATION ==========
 window.switchMode = (mode) => {
   const clientView = document.getElementById('client-view');
   const adminView = document.getElementById('admin-view');
@@ -633,26 +679,24 @@ function openModal(title, bodyHtml, footHtml){
 window.closeModal = () => document.getElementById('modal-root').classList.add('masque');
 
 function openAdminLogin(onSuccess){
-  openModal('Accès Admin', `
+  openModal(I18N[currentLang].admin, `
     <div class="form-group">
-      <label class="form-label">Code d'accès</label>
+      <label class="form-label">PIN Code</label>
       <input type="password" class="form-input" id="admin-pass" placeholder="••••" onkeydown="if(event.key==='Enter')window.__adminSubmit()">
     </div>`,
-    `<button class="btn btn-outline" onclick="closeModal()">Annuler</button>
-     <button class="btn btn-primary" onclick="window.__adminSubmit()">Entrer</button>`);
+    `<button class="btn btn-outline" onclick="closeModal()">${I18N[currentLang].retour}</button>
+     <button class="btn btn-primary" onclick="window.__adminSubmit()">${I18N[currentLang].continuer}</button>`);
   window.__adminSubmit = () => {
-    const val = document.getElementById('admin-pass').value;
-    if (val === 'rachid31') { closeModal(); onSuccess(); }
-    else { document.getElementById('admin-pass').style.borderColor = 'var(--danger)'; document.getElementById('admin-pass').value=''; }
+    if (document.getElementById('admin-pass').value === 'rachid31') { closeModal(); onSuccess(); }
+    else { document.getElementById('admin-pass').style.borderColor = 'var(--danger)'; }
   };
   setTimeout(() => document.getElementById('admin-pass')?.focus(), 50);
 }
 
-// ========== CLIENT : SERVICES ==========
 function renderClientServices(){
   const grid = document.getElementById('grid-services-client');
-  if (!appData.services || !appData.services.length){
-    grid.innerHTML = `<div class="section-sub">Aucun service disponible pour l'instant.</div>`;
+  if (!appData.services.length){
+    grid.innerHTML = `<div class="section-sub">Aucun service disponible.</div>`;
     return;
   }
   grid.innerHTML = appData.services.map(([key, s]) => {
@@ -668,24 +712,23 @@ function renderClientServices(){
 window.toggleService = (key) => {
   const svc = appData.services.find(([k]) => k === key);
   if (!svc) return;
-  const [k, s] = svc;
   const idx = booking.services.findIndex(x => x.key === key);
   if (idx >= 0) booking.services.splice(idx, 1);
-  else booking.services.push({ key: k, nom: s.nom, tarif: Number(s.tarif), duree: Number(s.duree) });
+  else booking.services.push({ key: svc[0], nom: svc[1].nom, tarif: Number(svc[1].tarif), duree: Number(svc[1].duree) });
   renderClientServices();
   updateTicketBar();
 };
 
-// ========== CLIENT : COIFFEURS ==========
 function renderClientCoiffeurs(){
   const grid = document.getElementById('grid-coiffeurs-client');
-  const anyCard = `<div class="barber-card ${booking.coiffeurId==='any'?'selected':''}" onclick="selectCoiffeur('any','Sans préférence')">
+  const anyCard = `<div class="barber-card ${booking.coiffeurId==='any'?'selected':''}" onclick="selectCoiffeur('any','${I18N[currentLang].sans_pref}')">
     <div class="barber-avatar"><i class="fa-solid fa-shuffle"></i></div>
-    <div style="font-weight:600;">Sans préférence</div>
-    <div class="kpi-sub">Premier disponible</div>
+    <div style="font-weight:600;">${I18N[currentLang].sans_pref}</div>
+    <div class="kpi-sub">${I18N[currentLang].premier_dispo}</div>
   </div>`;
-  const cards = (appData.coiffeurs||[]).map(([key, c]) => {
-    const avatarContent = (c.nom||'?').charAt(0).toUpperCase();
+  const cards = appData.coiffeurs.map(([key, c]) => {
+    const fallbackUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(c.nom||'Barber')}&background=c9a227&color=000`;
+    const avatarContent = c.image ? `<img src="${c.image}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${fallbackUrl}'">` : `${(c.nom||'?').charAt(0).toUpperCase()}`;
     return `
     <div class="barber-card ${booking.coiffeurId===key?'selected':''}" onclick="selectCoiffeur('${key}','${(c.nom||'').replace(/'/g,"\\'")}')">
       <div class="barber-avatar">${avatarContent}</div>
@@ -693,7 +736,7 @@ function renderClientCoiffeurs(){
       <div class="kpi-sub">${c.specialite||'Barbier'}</div>
     </div>`;
   }).join('');
-  grid.innerHTML = anyCard + (cards || '');
+  grid.innerHTML = anyCard + cards;
 }
 window.selectCoiffeur = (key, nom) => {
   booking.coiffeurId = key;
@@ -703,7 +746,6 @@ window.selectCoiffeur = (key, nom) => {
   setTimeout(() => { if (stepIsValid(booking.step)) window.nextStep(); }, 350);
 };
 
-// ========== CLIENT : GALERIE ==========
 function renderClientGalerie(){
   const el = document.getElementById('client-gallery');
   const section = document.getElementById('client-gallery-section');
@@ -711,7 +753,7 @@ function renderClientGalerie(){
     section.classList.remove('masque');
     el.innerHTML = appData.galerie.map(([k, g]) => `
       <div class="gallery-item">
-        <img src="${g.url}" alt="Galerie" loading="lazy" onerror="this.style.display='none'">
+        <img src="${g.url}" loading="lazy" referrerpolicy="no-referrer">
       </div>
     `).join('');
   } else {
@@ -719,151 +761,61 @@ function renderClientGalerie(){
   }
 }
 
-// ========== CLIENT : CALENDRIER CORRIGÉ ==========
+let currentMonth = new Date().getMonth();
+let currentYear = new Date().getFullYear();
 
-// Fonction qui génère TOUJOURS des créneaux pour une date donnée
-function generateSlotsForDate(date) {
-  const [oh, om] = (appData.settings.ouverture || '09:00').split(':').map(Number);
-  const [fh, fm] = (appData.settings.fermeture || '20:00').split(':').map(Number);
-  const slots = [];
-  let t = oh * 60 + om;
-  const end = fh * 60 + fm;
-  const step = Number(appData.settings.dureeSlot) || 30;
-  
-  // Si la date est aujourd'hui, on ne montre que les créneaux futurs
-  const today = new Date();
-  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-  const isToday = date === todayStr;
-  const currentMinutes = today.getHours() * 60 + today.getMinutes();
-  const minTime = isToday ? currentMinutes + 30 : 0;
-
-  // Générer les créneaux
-  while (t + step <= end) {
-    if (t > minTime) {
-      const h = String(Math.floor(t/60)).padStart(2,'0');
-      const m = String(t%60).padStart(2,'0');
-      slots.push(`${h}:${m}`);
-    }
-    t += step;
-  }
-  return slots;
-}
-
-// Récupère les créneaux déjà pris pour une date
-function getTakenSlotsForDate(date) {
-  const taken = [];
-  const coiffeurId = booking.coiffeurId || null;
-  
-  (appData.reservations||[]).forEach(([key, r]) => {
-    if (r.statut === 'annule') return;
-    if (r.date === date) {
-      if (coiffeurId && coiffeurId !== 'any') {
-        if (r.coiffeurNom === booking.coiffeurNom) {
-          if (r.heure) taken.push(r.heure);
-        }
-      } else {
-        if (r.heure) taken.push(r.heure);
-      }
-    }
-  });
-  return taken;
-}
-
-// Récupère les créneaux disponibles
-function getAvailableSlotsForDate(date) {
-  const slots = generateSlotsForDate(date);
-  const taken = getTakenSlotsForDate(date);
-  return slots.filter(slot => !taken.includes(slot));
-}
-
-// Trouve la première date disponible
 function getFirstAvailableDate() {
   let cursor = new Date();
-  cursor.setHours(0, 0, 0, 0);
-  
+  const [fh, fm] = (appData.settings.fermeture || '20:00').split(':').map(Number);
+  if (cursor.getHours() * 60 + cursor.getMinutes() >= fh * 60 + fm) cursor.setDate(cursor.getDate() + 1);
   let guard = 0;
-  while (guard < 60) {
-    const dayOfWeek = cursor.getDay();
-    const isClosed = (appData.settings.joursFermeture || []).includes(dayOfWeek);
-    if (!isClosed) {
-      const dateStr = `${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,'0')}-${String(cursor.getDate()).padStart(2,'0')}`;
-      const slots = getAvailableSlotsForDate(dateStr);
-      if (slots.length > 0) {
-        return new Date(cursor);
-      }
-    }
+  while (guard < 60){
+    if (!(appData.settings.joursFermeture||[]).includes(cursor.getDay())) return new Date(cursor);
     cursor.setDate(cursor.getDate() + 1);
     guard++;
   }
-  // Fallback: retourner aujourd'hui + 1 jour
-  const fallback = new Date();
-  fallback.setDate(fallback.getDate() + 1);
-  return fallback;
+  return new Date();
 }
 
-function renderCalendar() {
+function renderCalendar(){
   const wrap = document.getElementById('calendar-wrapper');
   if (!wrap) return;
 
-  const monthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
-  const dayNames = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+  const monthNames = currentLang === 'ar' ? ['يناير', 'فبراير', 'مارس', 'أبريل', 'ماي', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'] : ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+  const dayNames = currentLang === 'ar' ? ['أحد', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'] : ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
 
   const firstDay = new Date(currentYear, currentMonth, 1).getDay();
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-  
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  
+  const today = new Date(); today.setHours(0,0,0,0);
   const isCurrentMonth = currentYear === today.getFullYear() && currentMonth === today.getMonth();
 
   let html = `
     <div class="calendar-header">
       <div class="calendar-title">${monthNames[currentMonth]} ${currentYear}</div>
       <div class="calendar-nav">
-        <button class="calendar-btn" onclick="prevMonth()" ${isCurrentMonth ? 'disabled' : ''}><i class="fa-solid fa-chevron-left"></i></button>
-        <button class="calendar-btn" onclick="nextMonth()"><i class="fa-solid fa-chevron-right"></i></button>
+        <button class="calendar-btn" onclick="prevMonth()" ${isCurrentMonth ? 'disabled' : ''}><i class="fa-solid fa-chevron-${currentLang==='ar'?'right':'left'}"></i></button>
+        <button class="calendar-btn" onclick="nextMonth()"><i class="fa-solid fa-chevron-${currentLang==='ar'?'left':'right'}"></i></button>
       </div>
     </div>
     <div class="calendar-grid">
   `;
 
-  for (let d of dayNames) {
-    html += `<div class="calendar-day-name">${d}</div>`;
-  }
-
-  for (let i = 0; i < firstDay; i++) {
-    html += `<div class="calendar-day empty"></div>`;
-  }
+  for (let d of dayNames) html += `<div class="calendar-day-name">${d}</div>`;
+  for (let i = 0; i < firstDay; i++) html += `<div class="calendar-day empty"></div>`;
 
   for (let i = 1; i <= daysInMonth; i++) {
     const d = new Date(currentYear, currentMonth, i);
     const iso = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    let disabled = d < today || (appData.settings.joursFermeture||[]).includes(d.getDay());
     
-    let disabled = false;
-    
-    // Date passée
-    if (d < today) {
-      disabled = true;
-    }
-    
-    // Jour de fermeture
-    if ((appData.settings.joursFermeture || []).includes(d.getDay())) {
-      disabled = true;
-    }
-    
-    // Vérifier si le jour a des créneaux disponibles
-    if (!disabled) {
-      const availableSlots = getAvailableSlotsForDate(iso);
-      if (availableSlots.length === 0) {
-        disabled = true;
-      }
+    if (d.getTime() === today.getTime()) {
+      const [fh, fm] = (appData.settings.fermeture || '20:00').split(':').map(Number);
+      if (new Date().getHours() * 60 + new Date().getMinutes() >= fh * 60 + fm) disabled = true;
     }
 
     const sel = booking.date === iso ? 'selected' : '';
     const click = disabled ? '' : `onclick="selectDate('${iso}')"`;
-    const classes = `calendar-day ${sel} ${disabled ? 'disabled' : ''}`;
-    
-    html += `<div class="${classes}" ${click}>${i}</div>`;
+    html += `<div class="calendar-day ${sel} ${disabled ? 'disabled' : ''}" ${click}>${i}</div>`;
   }
 
   html += `</div>`;
@@ -871,162 +823,125 @@ function renderCalendar() {
   renderTimeGrid();
 }
 
-function renderTimeGrid() {
+window.prevMonth = () => { currentMonth--; if (currentMonth < 0) { currentMonth = 11; currentYear--; } renderCalendar(); };
+window.nextMonth = () => { currentMonth++; if (currentMonth > 11) { currentMonth = 0; currentYear++; } renderCalendar(); };
+window.selectDate = (iso) => { booking.date = iso; booking.heure = null; renderCalendar(); updateTicketBar(); };
+
+function generateSlots(){
+  const [oh, om] = (appData.settings.ouverture || '09:00').split(':').map(Number);
+  const [fh, fm] = (appData.settings.fermeture || '20:00').split(':').map(Number);
+  const slots = [];
+  let t = oh*60+om;
+  const end = fh*60+fm;
+  const step = Number(appData.settings.dureeSlot) || 30;
+  
+  const now = new Date();
+  const isoToday = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const isToday = booking.date === isoToday;
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+  while (t + step <= end){
+    if (!isToday || t > currentMinutes) {
+      slots.push(`${String(Math.floor(t/60)).padStart(2,'0')}:${String(t%60).padStart(2,'0')}`);
+    }
+    t += step;
+  }
+  return slots;
+}
+
+function renderTimeGrid(){
   const grid = document.getElementById('time-grid');
-  if (!grid) return;
-  
-  if (!booking.date) {
-    grid.innerHTML = `<div class="section-sub">Choisissez une date pour voir les créneaux</div>`;
+  if (!booking.date){ grid.innerHTML = `<div class="section-sub">Choisissez une date</div>`; return; }
+  const slots = generateSlots();
+  if (slots.length === 0) {
+    grid.innerHTML = `<div class="section-sub" style="color:var(--warning); text-align:center; padding: 20px;">Aucun créneau disponible.</div>`;
     return;
   }
-  
-  const availableSlots = getAvailableSlotsForDate(booking.date);
-  
-  if (availableSlots.length === 0) {
-    grid.innerHTML = `<div class="section-sub" style="color:var(--warning); text-align:center; padding: 20px;">
-      <i class="fa-solid fa-clock" style="font-size:1.5rem; display:block; margin-bottom:10px;"></i>
-      Aucun créneau disponible pour cette date.<br>
-      <small style="color:var(--text-dim);">Essayez une autre date ou un autre coiffeur.</small>
-    </div>`;
-    return;
-  }
-  
-  const taken = getTakenSlotsForDate(booking.date);
-  
-  grid.innerHTML = availableSlots.map(s => {
-    const isTaken = taken.includes(s);
-    const sel = booking.heure === s ? 'selected' : '';
-    return `<div class="time-chip ${sel} ${isTaken ? 'taken' : ''}" onclick="${isTaken ? '' : `selectHeure('${s}')`}">
-      ${s} ${isTaken ? '🔒' : ''}
-    </div>`;
+  const taken = new Set(appData.reservations.filter(([k,r]) => r.date === booking.date && r.statut !== 'annule').map(([k,r]) => r.heure));
+  grid.innerHTML = slots.map(s => {
+    const isTaken = taken.has(s);
+    return `<div class="time-chip ${booking.heure === s ? 'selected' : ''} ${isTaken?'taken':''}" onclick="${isTaken?'':`selectHeure('${s}')`}">${s}</div>`;
   }).join('');
 }
 
-window.prevMonth = () => {
-  currentMonth--;
-  if (currentMonth < 0) { currentMonth = 11; currentYear--; }
-  renderCalendar();
+window.selectHeure = (h) => { 
+  booking.heure = h; 
+  renderTimeGrid(); 
+  updateTicketBar(); 
+  setTimeout(() => { if (stepIsValid(booking.step)) window.nextStep(); }, 350);
 };
 
-window.nextMonth = () => {
-  currentMonth++;
-  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-  renderCalendar();
-};
-
-window.selectDate = (iso) => {
-  booking.date = iso;
-  booking.heure = null;
-  renderCalendar();
-  updateTicketBar();
-};
-
-window.selectHeure = (h) => {
-  booking.heure = h;
-  renderTimeGrid();
-  updateTicketBar();
-  setTimeout(() => {
-    if (stepIsValid(booking.step)) window.nextStep();
-  }, 400);
-};
-
-// ========== CLIENT : STEP 4 ==========
 window.validateStep4 = () => {
   booking.nom = document.getElementById('input-nom').value.trim();
   booking.tel = document.getElementById('input-tel').value.trim();
   updateTicketBar();
 };
 
-// ========== CLIENT : STEP 5 ==========
 function renderConfirmRecap(){
   const total = booking.services.reduce((s,x)=>s+x.tarif,0);
   document.getElementById('confirm-recap').innerHTML = `
-    <div class="confirm-line"><span>Client</span><strong>${booking.nom}</strong></div>
-    <div class="confirm-line"><span>Téléphone</span><strong>${booking.tel}</strong></div>
-    <div class="confirm-line"><span>Coiffeur</span><strong>${booking.coiffeurNom}</strong></div>
-    <div class="confirm-line"><span>Date</span><strong>${new Date(booking.date).toLocaleDateString('fr-FR',{weekday:'long', day:'numeric', month:'long'})}</strong></div>
-    <div class="confirm-line"><span>Heure</span><strong>${booking.heure}</strong></div>
-    <div class="confirm-line"><span>Prestations</span><strong>${booking.services.map(s=>s.nom).join(', ')}</strong></div>
+    <div class="confirm-line"><span>${I18N[currentLang].client}</span><strong>${booking.nom}</strong></div>
+    <div class="confirm-line"><span>${I18N[currentLang].telephone}</span><strong>${booking.tel}</strong></div>
+    <div class="confirm-line"><span>${I18N[currentLang].coiffeurs}</span><strong>${booking.coiffeurNom}</strong></div>
+    <div class="confirm-line"><span>${I18N[currentLang].date_heure}</span><strong>${booking.date} @ ${booking.heure}</strong></div>
+    <div class="confirm-line"><span>${I18N[currentLang].services}</span><strong>${booking.services.map(s=>s.nom).join(', ')}</strong></div>
     <div class="confirm-line" style="font-size:1.1rem;"><span>Total</span><strong style="color:var(--gold);font-family:var(--font-mono);">${money(total)}</strong></div>
   `;
 }
 
-// ========== STEPPER ==========
-const STEP_LABELS = ['Prestations','Coiffeur','Date & Heure','Coordonnées','Confirmation'];
 function renderStepper(){
-  const el = document.getElementById('stepper');
-  el.innerHTML = STEP_LABELS.map((lbl,i) => {
+  const labels = [I18N[currentLang].services, I18N[currentLang].coiffeurs, I18N[currentLang].date_heure, I18N[currentLang].step4_title, I18N[currentLang].step5_title];
+  document.getElementById('stepper').innerHTML = labels.map((lbl,i) => {
     const n = i+1;
     const cls = n < booking.step ? 'done' : (n === booking.step ? 'active' : '');
-    const connector = n < STEP_LABELS.length ? '<div class="step-connector"></div>' : '';
-    const click = n < booking.step ? `onclick="window.goToStep(${n})"` : '';
-    const style = n < booking.step ? 'cursor:pointer; transition:0.2s;' : 'transition:0.2s;';
-    return `<div class="step-pill ${cls}" style="${style}" ${click}>${n<booking.step?'<i class="fa-solid fa-check"></i>':n}. ${lbl}</div>${connector}`;
+    const connector = n < labels.length ? '<div class="step-connector"></div>' : '';
+    return `<div class="step-pill ${cls}" style="${n < booking.step ? 'cursor:pointer;' : ''}" ${n < booking.step ? `onclick="window.goToStep(${n})"` : ''}>${n<booking.step?'<i class="fa-solid fa-check"></i>':n}. ${lbl}</div>${connector}`;
   }).join('');
 }
 
-window.goToStep = (n) => {
-  if (n < booking.step) { booking.step = n; renderBookingStep(); }
-};
+window.goToStep = (n) => { if (n < booking.step) { booking.step = n; renderBookingStep(); } };
 
 function stepIsValid(step){
   switch(step){
     case 1: return booking.services.length > 0;
     case 2: return !!booking.coiffeurId;
-    case 3: {
-      if (!booking.date || !booking.heure) return false;
-      const availableSlots = getAvailableSlotsForDate(booking.date);
-      if (!availableSlots.includes(booking.heure)) {
-        booking.heure = null;
-        renderTimeGrid();
-        return false;
-      }
-      return true;
-    }
+    case 3: return !!booking.date && !!booking.heure;
     case 4: return booking.nom.length > 1 && booking.tel.length > 6;
     default: return true;
   }
 }
 
 function renderBookingStep(){
-  for (let i = 1; i <= 5; i++){
-    const stepEl = document.getElementById(`c-step-${i}`);
-    if (stepEl) stepEl.classList.toggle('masque', booking.step !== i);
+  for (let i=1;i<=5;i++){
+    const el = document.getElementById(`c-step-${i}`);
+    if (el) el.classList.toggle('masque', booking.step !== i);
   }
   document.getElementById('c-step-success').classList.add('masque');
   renderStepper();
-  
   if (booking.step === 3) {
-    // Trouver une date disponible si aucune n'est sélectionnée
     if (!booking.date) {
       const d = getFirstAvailableDate();
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      booking.date = `${year}-${month}-${day}`;
-      currentMonth = d.getMonth();
-      currentYear = d.getFullYear();
+      booking.date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      currentMonth = d.getMonth(); currentYear = d.getFullYear();
     }
     renderCalendar();
   }
-  
   if (booking.step === 5) renderConfirmRecap();
   updateTicketBar();
 }
 
 function updateTicketBar(){
   const bar = document.getElementById('ticket-bar');
-  const success = !document.getElementById('c-step-success').classList.contains('masque');
-  if (success){ bar.classList.remove('show'); return; }
+  if (!document.getElementById('c-step-success').classList.contains('masque')){ bar.classList.remove('show'); return; }
 
   const total = booking.services.reduce((s,x)=>s+x.tarif,0);
-  document.getElementById('ticket-count-lbl').textContent = `${booking.services.length} prestation${booking.services.length>1?'s':''}`;
+  document.getElementById('ticket-count-lbl').textContent = `${booking.services.length} ${I18N[currentLang].service}`;
   document.getElementById('ticket-total').textContent = money(total);
   document.getElementById('btn-prev').style.visibility = booking.step === 1 ? 'hidden' : 'visible';
 
   const nextBtn = document.getElementById('btn-next');
   nextBtn.disabled = !stepIsValid(booking.step);
-  nextBtn.innerHTML = booking.step === 5 ? 'Confirmer <i class="fa-solid fa-check"></i>' : 'Continuer <i class="fa-solid fa-arrow-right"></i>';
+  nextBtn.innerHTML = booking.step === 5 ? `${I18N[currentLang].enregistrer} <i class="fa-solid fa-check"></i>` : `${I18N[currentLang].continuer} <i class="fa-solid fa-arrow-right"></i>`;
 
   bar.classList.toggle('show', booking.services.length > 0);
 }
@@ -1037,28 +952,23 @@ window.nextStep = () => {
   booking.step++;
   renderBookingStep();
 };
-window.prevStep = () => {
-  if (booking.step === 1) return;
-  booking.step--;
-  renderBookingStep();
-};
+window.prevStep = () => { if (booking.step > 1) { booking.step--; renderBookingStep(); } };
 
 async function submitReservation(){
   const btn = document.getElementById('btn-next');
   if (btn) btn.disabled = true;
   try {
     const total = booking.services.reduce((s,x)=>s+x.tarif,0);
-    const serviceStr = booking.services.map(s => s.nom).join(' + ');
     await apiPost('createReservation', { 
-      nom: booking.nom, tel: booking.tel, service: serviceStr, coiffeur: booking.coiffeurNom, date: booking.date, heure: booking.heure, prix: total
+      nom: booking.nom, tel: booking.tel, service: booking.services.map(s => s.nom).join(' + '), coiffeur: booking.coiffeurNom, date: booking.date, heure: booking.heure, prix: total
     });
     document.getElementById('c-step-5').classList.add('masque');
     document.getElementById('c-step-success').classList.remove('masque');
-    document.getElementById('success-ref').textContent = `${booking.nom}, votre rendez-vous du ${new Date(booking.date).toLocaleDateString('fr-FR')} à ${booking.heure} est enregistré.`;
+    document.getElementById('success-ref').textContent = `${booking.nom}, ${booking.date} @ ${booking.heure}.`;
     updateTicketBar();
     syncAndRender();
   } catch(e) {
-    alert("Erreur lors de l'envoi. Veuillez réessayer.");
+    alert("Erreur de connexion.");
     if (btn) btn.disabled = false;
   }
 }
@@ -1072,38 +982,35 @@ window.resetBooking = () => {
   renderBookingStep();
 };
 
-// ========== ADMIN : DASHBOARD ==========
 let myChart;
 function renderDashboard(){
   let totalCA = 0, countAttente = 0;
   const serviceStats = {};
-  (appData.reservations||[]).forEach(([k,r]) => {
+  appData.reservations.forEach(([k,r]) => {
     if (r.statut !== 'annule') totalCA += Number(r.total || 0);
     if (r.statut === 'attente') countAttente++;
     (r.prestations||[]).forEach(p => { serviceStats[p.nom] = (serviceStats[p.nom]||0)+1; });
   });
   document.getElementById('kpi-ca').textContent = money(totalCA);
-  document.getElementById('kpi-total').textContent = (appData.reservations||[]).length;
-  document.getElementById('kpi-attente').textContent = `${countAttente} en attente`;
+  document.getElementById('kpi-total').textContent = appData.reservations.length;
+  document.getElementById('kpi-attente').textContent = `${countAttente} ${I18N[currentLang].attente}`;
   const top = Object.entries(serviceStats).sort((a,b)=>b[1]-a[1])[0];
-  document.getElementById('kpi-top').textContent = top ? top[0] : 'Aucun';
-  document.getElementById('kpi-coiffeurs').textContent = (appData.coiffeurs||[]).length;
+  document.getElementById('kpi-top').textContent = top ? top[0] : '—';
+  document.getElementById('kpi-coiffeurs').textContent = appData.coiffeurs.length;
 
-  const recent = [...(appData.reservations||[])].sort((a,b)=> (b[1].creeLe||0)-(a[1].creeLe||0)).slice(0,6);
-  const tbody = document.getElementById('dash-table-body');
-  tbody.innerHTML = recent.length ? recent.map(([k,r]) => rowHtml(r,false)).join('') :
+  const recent = [...appData.reservations].sort((a,b)=> (b[1].creeLe||0)-(a[1].creeLe||0)).slice(0,6);
+  document.getElementById('dash-table-body').innerHTML = recent.length ? recent.map(([k,r]) => rowHtml(r,false)).join('') :
     `<tr><td colspan="5" class="empty-row">Aucune réservation</td></tr>`;
 
   const dataMap = {};
-  (appData.reservations||[]).forEach(([k,r]) => { dataMap[r.date] = (dataMap[r.date]||0)+1; });
+  appData.reservations.forEach(([k,r]) => { dataMap[r.date] = (dataMap[r.date]||0)+1; });
   const labels = Object.keys(dataMap).sort();
-  const values = labels.map(l => dataMap[l]);
   const ctx = document.getElementById('chartActivity').getContext('2d');
   if (myChart) myChart.destroy();
   myChart = new Chart(ctx, {
     type:'line',
-    data:{ labels, datasets:[{ label:'Rendez-vous', data: values, borderColor:'#c9a227', tension:.4, fill:true, backgroundColor:'rgba(201,162,39,.12)' }] },
-    options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true, grid:{color:'#2a2a30'}, ticks:{color:'#8c8c94'}}, x:{grid:{color:'#2a2a30'}, ticks:{color:'#8c8c94'}} } }
+    data:{ labels, datasets:[{ label:'RDV', data: labels.map(l => dataMap[l]), borderColor:'#c9a227', tension:.4, fill:true, backgroundColor:'rgba(201,162,39,.12)' }] },
+    options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true, grid:{color:'#2a2a30'}}, x:{grid:{color:'#2a2a30'}} } }
   });
 }
 
@@ -1112,13 +1019,13 @@ function rowHtml(r, withActions, key){
     <td><div style="font-weight:600;">${r.clientNom}</div><div style="font-size:.75rem;color:var(--text-muted);">${r.clientTel}</div></td>
     <td>${(r.prestations||[]).map(p=>p.nom).join(', ')||'N/A'}</td>
     ${withActions ? `<td>${r.coiffeurNom||'—'}</td>` : ''}
-    <td><div>${new Date(r.date).toLocaleDateString('fr-FR')}</div><div style="color:var(--gold);font-weight:700;font-family:var(--font-mono);">${r.heure}</div></td>
+    <td><div>${r.date}</div><div style="color:var(--gold);font-weight:700;font-family:var(--font-mono);">${r.heure}</div></td>
     <td style="font-family:var(--font-mono);">${money(r.total)}</td>
-    <td><span class="status status-${r.statut||'confirme'}">${STATUT_CODE_TO_FR[r.statut]||'Confirmé'}</span></td>
+    <td><span class="status status-${r.statut||'confirme'}">${I18N[currentLang][r.statut]||r.statut}</span></td>
     ${withActions ? `<td><div style="display:flex;gap:5px;">
-        <button class="btn btn-outline btn-sm" title="Confirmer" onclick="window.updateStatus('${key}','confirme')"><i class="fa-solid fa-check"></i></button>
-        <button class="btn btn-outline btn-sm" title="Annuler" onclick="window.updateStatus('${key}','annule')"><i class="fa-solid fa-xmark"></i></button>
-        <button class="btn btn-danger btn-sm" title="Supprimer" onclick="window.deleteResa('${key}')"><i class="fa-solid fa-trash"></i></button>
+        <button class="btn btn-outline btn-sm" onclick="window.updateStatus('${key}','confirme')"><i class="fa-solid fa-check"></i></button>
+        <button class="btn btn-outline btn-sm" onclick="window.updateStatus('${key}','annule')"><i class="fa-solid fa-xmark"></i></button>
+        <button class="btn btn-danger btn-sm" onclick="window.deleteResa('${key}')"><i class="fa-solid fa-trash"></i></button>
       </div></td>` : ''}
   </tr>`;
 }
@@ -1128,226 +1035,152 @@ function renderReservationsTable(){
   if (!tbody) return;
   const statutFilter = document.getElementById('filter-statut')?.value || '';
   const search = (document.getElementById('filter-search')?.value || '').toLowerCase();
-  let rows = (appData.reservations||[]).filter(([k,r]) => {
+  let rows = appData.reservations.filter(([k,r]) => {
     if (statutFilter && (r.statut||'confirme') !== statutFilter) return false;
-    if (search && !r.clientNom.toLowerCase().includes(search)) return false;
-    return true;
+    return !(search && !r.clientNom.toLowerCase().includes(search));
   }).sort((a,b)=> (b[1].creeLe||0)-(a[1].creeLe||0));
-  tbody.innerHTML = rows.length ? rows.map(([k,r]) => rowHtml(r, true, k)).join('') :
-    `<tr><td colspan="7" class="empty-row">Aucune réservation</td></tr>`;
+  tbody.innerHTML = rows.length ? rows.map(([k,r]) => rowHtml(r, true, k)).join('') : `<tr><td colspan="7" class="empty-row">Aucun résultat</td></tr>`;
 }
 
-window.updateStatus = async (id, status) => { 
-  await apiPost('updateReservationStatus', { id, statut: STATUT_CODE_TO_FR[status] }); 
-  syncAndRender(); 
-};
-window.deleteResa = async (id) => { 
-  if (confirm('Supprimer cette réservation ?')) { 
-    await apiPost('deleteReservation', { id }); 
-    syncAndRender(); 
-  } 
-};
+window.updateStatus = async (id, status) => { await apiPost('updateReservationStatus', { id, statut: STATUT_CODE_TO_FR[status] }); syncAndRender(); };
+window.deleteResa = async (id) => { if (confirm('Supprimer ?')) { await apiPost('deleteReservation', { id }); syncAndRender(); } };
 
 window.exportData = () => {
-  const header = ['Client','Téléphone','Services','Coiffeur','Date','Heure','Total','Statut'];
-  const lines = (appData.reservations||[]).map(([k,r]) => [
-    r.clientNom, r.clientTel, (r.prestations||[]).map(p=>p.nom).join(' + '),
-    r.coiffeurNom||'', r.date, r.heure, r.total, STATUT_CODE_TO_FR[r.statut]||'Confirmé'
-  ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
-  const csv = [header.join(','), ...lines].join('\n');
-  const blob = new Blob(["\uFEFF"+csv], { type:'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `reservations_${Date.now()}.csv`; a.click();
-  URL.revokeObjectURL(url);
+  const lines = appData.reservations.map(([k,r]) => [r.clientNom, r.clientTel, (r.prestations||[]).map(p=>p.nom).join(' + '), r.coiffeurNom||'', r.date, r.heure, r.total, r.statut||'confirme'].map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
+  const blob = new Blob(["\uFEFF"+['Client,Tel,Services,Coiffeur,Date,Heure,Prix,Statut', ...lines].join('\n')], { type:'text/csv;charset=utf-8;' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `reservations_${Date.now()}.csv`; a.click();
 };
 
-// ========== ADMIN : SERVICES ==========
 function renderServicesAdmin(){
-  const el = document.getElementById('services-list');
-  el.innerHTML = (appData.services||[]).length ? (appData.services||[]).map(([key,s]) => `
+  document.getElementById('services-list').innerHTML = appData.services.length ? appData.services.map(([key,s]) => `
     <div class="list-card">
-      <div>
-        <div style="font-weight:600;">${s.nom}</div>
-        <div class="meta">${money(s.tarif)} · ${s.duree} min</div>
-      </div>
+      <div><div style="font-weight:600;">${s.nom}</div><div class="meta">${money(s.tarif)} · ${s.duree} min</div></div>
       <div style="display:flex;gap:6px;">
         <button class="btn btn-outline btn-sm" onclick='openServiceModal(${JSON.stringify(key)})'><i class="fa-solid fa-pen"></i></button>
         <button class="btn btn-danger btn-sm" onclick="deleteService('${key}')"><i class="fa-solid fa-trash"></i></button>
       </div>
-    </div>`).join('') : `<div class="section-sub">Aucun service. Ajoutez-en un.</div>`;
+    </div>`).join('') : `<div class="section-sub">Aucun service</div>`;
 }
+
 window.openServiceModal = (key) => {
-  const existing = key ? (appData.services||[]).find(([k])=>k===key)?.[1] : null;
-  openModal(existing ? 'Modifier le service' : 'Nouveau service', `
+  const existing = key ? appData.services.find(([k])=>k===key)?.[1] : null;
+  openModal('Service', `
     <div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="svc-nom" value="${existing?.nom||''}"></div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Tarif (${appData.settings.devise})</label><input type="number" class="form-input" id="svc-tarif" value="${existing?.tarif||''}"></div>
+      <div class="form-group"><label class="form-label">Tarif</label><input type="number" class="form-input" id="svc-tarif" value="${existing?.tarif||''}"></div>
       <div class="form-group"><label class="form-label">Durée (min)</label><input type="number" class="form-input" id="svc-duree" value="${existing?.duree||''}"></div>
     </div>`,
-    `<button class="btn btn-outline" onclick="closeModal()">Annuler</button>
-     <button class="btn btn-primary" onclick="saveService(${key?`'${key}'`:'null'})">Enregistrer</button>`);
+    `<button class="btn btn-outline" onclick="closeModal()">${I18N[currentLang].retour}</button>
+     <button class="btn btn-primary" onclick="saveService(${key?`'${key}'`:'null'})">${I18N[currentLang].enregistrer}</button>`);
 };
+
 window.saveService = async (key) => {
   const nom = document.getElementById('svc-nom').value.trim();
   const tarif = Number(document.getElementById('svc-tarif').value);
   const duree = Number(document.getElementById('svc-duree').value);
   if (!nom || !tarif || !duree) return;
   await apiPost('saveService', { data: { id: key, nom, tarif, duree } });
-  closeModal();
-  syncAndRender();
+  closeModal(); syncAndRender();
 };
-window.deleteService = async (key) => { 
-  if (confirm('Supprimer ce service ?')) { 
-    await apiPost('deleteService', { id: key }); 
-    syncAndRender(); 
-  } 
-};
+window.deleteService = async (key) => { if (confirm('Supprimer ?')) { await apiPost('deleteService', { id: key }); syncAndRender(); } };
 
-// ========== ADMIN : COIFFEURS ==========
 function renderCoiffeursAdmin(){
-  const el = document.getElementById('coiffeurs-list');
-  el.innerHTML = (appData.coiffeurs||[]).length ? (appData.coiffeurs||[]).map(([key,c]) => {
-    const avatarContent = (c.nom||'?').charAt(0).toUpperCase();
-    return `
-    <div class="list-card" style="display:flex;align-items:center;gap:15px;">
-      <div style="width:45px;height:45px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-light));display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;font-weight:bold;color:#000;">
-        ${avatarContent}
-      </div>
-      <div style="flex:1;">
-        <div style="font-weight:600;">${c.nom}</div>
-        <div class="meta">${c.specialite||'Barbier'}</div>
+  document.getElementById('coiffeurs-list').innerHTML = appData.coiffeurs.length ? appData.coiffeurs.map(([key,c]) => `
+    <div class="list-card">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:40px;height:40px;border-radius:50%;overflow:hidden;background:var(--gold-dim);display:flex;align-items:center;justify-content:center;">
+          ${c.image ? `<img src="${c.image}" style="width:100%;height:100%;object-fit:cover;">` : c.nom.charAt(0)}
+        </div>
+        <div><div style="font-weight:600;">${c.nom}</div><div class="meta">${c.specialite||'Barbier'}</div></div>
       </div>
       <div style="display:flex;gap:6px;">
         <button class="btn btn-outline btn-sm" onclick='openCoiffeurModal(${JSON.stringify(key)})'><i class="fa-solid fa-pen"></i></button>
         <button class="btn btn-danger btn-sm" onclick="deleteCoiffeur('${key}')"><i class="fa-solid fa-trash"></i></button>
       </div>
-    </div>`;
-  }).join('') : `<div class="section-sub">Aucun coiffeur. Ajoutez-en un.</div>`;
+    </div>`).join('') : `<div class="section-sub">Aucun coiffeur</div>`;
 }
+
 window.openCoiffeurModal = (key) => {
-  const existing = key ? (appData.coiffeurs||[]).find(([k])=>k===key)?.[1] : null;
-  openModal(existing ? 'Modifier le coiffeur' : 'Nouveau coiffeur', `
+  const existing = key ? appData.coiffeurs.find(([k])=>k===key)?.[1] : null;
+  openModal('Coiffeur', `
     <div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="cof-nom" value="${existing?.nom||''}"></div>
     <div class="form-group"><label class="form-label">Spécialité</label><input class="form-input" id="cof-spe" value="${existing?.specialite||''}"></div>
     <div class="form-group"><label class="form-label">URL Image</label><input class="form-input" id="cof-img" value="${existing?.image||''}"></div>`,
-    `<button class="btn btn-outline" onclick="closeModal()">Annuler</button>
-     <button class="btn btn-primary" onclick="saveCoiffeur(${key?`'${key}'`:'null'})">Enregistrer</button>`);
+    `<button class="btn btn-outline" onclick="closeModal()">${I18N[currentLang].retour}</button>
+     <button class="btn btn-primary" onclick="saveCoiffeur(${key?`'${key}'`:'null'})">${I18N[currentLang].enregistrer}</button>`);
 };
+
 window.saveCoiffeur = async (key) => {
   const nom = document.getElementById('cof-nom').value.trim();
   const specialite = document.getElementById('cof-spe').value.trim();
-  const image = document.getElementById('cof-img').value.trim();
+  const image = formatImageUrl(document.getElementById('cof-img').value);
   if (!nom) return;
   await apiPost('saveCoiffeur', { data: { id: key, nom, specialite, image } });
-  closeModal();
-  syncAndRender();
+  closeModal(); syncAndRender();
 };
-window.deleteCoiffeur = async (key) => { 
-  if (confirm('Supprimer ce coiffeur ?')) { 
-    await apiPost('deleteCoiffeur', { id: key }); 
-    syncAndRender(); 
-  } 
+window.deleteCoiffeur = async (key) => { if (confirm('Supprimer ?')) { await apiPost('deleteCoiffeur', { id: key }); syncAndRender(); } };
+
+function renderGalerieAdmin(){
+  document.getElementById('galerie-list').innerHTML = appData.galerie.length ? appData.galerie.map(([key,g]) => `
+    <div class="gallery-item">
+      <img src="${g.url}" loading="lazy">
+      <button class="btn btn-danger btn-sm" style="position:absolute; top:8px; right:8px;" onclick="deleteGalerie('${key}')"><i class="fa-solid fa-trash"></i></button>
+    </div>`).join('') : `<div class="section-sub">Aucune photo</div>`;
+}
+
+window.openGalerieModal = () => {
+  openModal('Photo', `
+    <div class="form-group"><label class="form-label">URL Image</label><input class="form-input" id="gal-url"></div>`,
+    `<button class="btn btn-outline" onclick="closeModal()">${I18N[currentLang].retour}</button>
+     <button class="btn btn-primary" onclick="saveGalerie()">${I18N[currentLang].enregistrer}</button>`);
 };
 
-// ========== ADMIN : GALERIE ==========
-function renderGalerieAdmin(){
-  const el = document.getElementById('galerie-list');
-  el.innerHTML = (appData.galerie||[]).length ? (appData.galerie||[]).map(([key,g]) => `
-    <div class="gallery-item" style="position:relative;">
-      <img src="${g.url}" alt="Galerie" loading="lazy" onerror="this.style.display='none'">
-      <button class="btn btn-danger btn-sm" style="position:absolute; top:8px; right:8px; padding:4px 8px;" onclick="deleteGalerie('${key}')"><i class="fa-solid fa-trash"></i></button>
-    </div>`).join('') : `<div class="section-sub">Aucune photo.</div>`;
-}
-window.openGalerieModal = () => {
-  openModal('Ajouter une photo', `
-    <div class="form-group">
-      <label class="form-label">URL de l'image</label>
-      <input class="form-input" id="gal-url" placeholder="https://...">
-    </div>`,
-    `<button class="btn btn-outline" onclick="closeModal()">Annuler</button>
-     <button class="btn btn-primary" onclick="saveGalerie()">Enregistrer</button>`);
-};
 window.saveGalerie = async () => {
-  const url = document.getElementById('gal-url').value.trim();
+  const url = formatImageUrl(document.getElementById('gal-url').value);
   if (!url) return;
   await apiPost('saveGalerie', { data: { url } });
-  closeModal();
-  syncAndRender();
+  closeModal(); syncAndRender();
 };
-window.deleteGalerie = async (key) => { 
-  if (confirm('Supprimer cette photo ?')) { 
-    await apiPost('deleteGalerie', { id: key }); 
-    syncAndRender(); 
-  } 
-};
+window.deleteGalerie = async (key) => { if (confirm('Supprimer ?')) { await apiPost('deleteGalerie', { id: key }); syncAndRender(); } };
 
-// ========== ADMIN : PARAMETRES ==========
 function fillSettingsForm(){
   const s = appData.settings;
   document.getElementById('set-nom').value = s.nomSalon;
   document.getElementById('set-devise').value = s.devise;
-  document.getElementById('set-adresse').value = s.adresse || '';
-  document.getElementById('set-tel').value = s.telephone || '';
+  document.getElementById('set-adresse').value = s.adresse;
+  document.getElementById('set-tel').value = s.telephone;
   document.getElementById('set-ouverture').value = s.ouverture;
   document.getElementById('set-fermeture').value = s.fermeture;
   document.getElementById('set-duree').value = s.dureeSlot;
   document.getElementById('set-about-title').value = s.aboutTitle || '';
   document.getElementById('set-about-text').value = s.aboutText || '';
   document.getElementById('set-footer').value = s.footerText || '';
-  document.getElementById('set-jours').innerHTML = JOURS.map((j,i) => {
-    const checked = (s.joursFermeture||[]).includes(i);
-    return `<div class="form-check-pill ${checked?'checked':''}" data-day="${i}" onclick="this.classList.toggle('checked')">${j}</div>`;
-  }).join('');
+  document.getElementById('set-jours').innerHTML = JOURS[currentLang].map((j,i) => `
+    <div class="form-check-pill ${(s.joursFermeture||[]).includes(i)?'checked':''}" data-day="${i}" onclick="this.classList.toggle('checked')">${j}</div>
+  `).join('');
 }
+
 window.saveSettings = async () => {
   const joursFermeture = [...document.querySelectorAll('#set-jours .form-check-pill.checked')].map(el => Number(el.dataset.day));
-  const payload = {
-    nomSalon: document.getElementById('set-nom').value.trim() || 'Rachid MGH',
-    devise: document.getElementById('set-devise').value.trim() || 'DA',
-    adresse: document.getElementById('set-adresse').value.trim(),
-    telephone: document.getElementById('set-tel').value.trim(),
-    ouverture: document.getElementById('set-ouverture').value || '09:00',
-    fermeture: document.getElementById('set-fermeture').value || '20:00',
-    dureeSlot: Number(document.getElementById('set-duree').value) || 30,
-    joursFermeture,
-    aboutTitle: document.getElementById('set-about-title').value.trim(),
-    aboutText: document.getElementById('set-about-text').value.trim(),
-    footerText: document.getElementById('set-footer').value.trim()
-  };
-  const btn = event.target.closest('button');
-  const old = btn.innerHTML;
-  await apiPost('saveParametres', { data: payload });
-  btn.innerHTML = '<i class="fa-solid fa-check"></i> Enregistré';
-  setTimeout(() => btn.innerHTML = old, 1500);
+  await apiPost('saveParametres', {
+    data: {
+      nomSalon: document.getElementById('set-nom').value.trim(),
+      devise: document.getElementById('set-devise').value.trim(),
+      adresse: document.getElementById('set-adresse').value.trim(),
+      telephone: document.getElementById('set-tel').value.trim(),
+      ouverture: document.getElementById('set-ouverture').value,
+      fermeture: document.getElementById('set-fermeture').value,
+      dureeSlot: Number(document.getElementById('set-duree').value),
+      joursFermeture,
+      aboutTitle: document.getElementById('set-about-title').value.trim(),
+      aboutText: document.getElementById('set-about-text').value.trim(),
+      footerText: document.getElementById('set-footer').value.trim()
+    }
+  });
   syncAndRender();
 };
 
-// ========== INITIALISATION IMMÉDIATE ==========
-// Les données de démonstration sont déjà chargées dans appData
-applyBranding();
-renderClientServices();
-renderClientCoiffeurs();
-renderClientGalerie();
-renderDashboard();
-renderReservationsTable();
-renderServicesAdmin();
-renderCoiffeursAdmin();
-renderGalerieAdmin();
-fillSettingsForm();
-document.getElementById('loader').classList.add('masque');
-
-// Forcer l'initialisation du booking avec une date valide
-const firstDate = getFirstAvailableDate();
-const year = firstDate.getFullYear();
-const month = String(firstDate.getMonth() + 1).padStart(2, '0');
-const day = String(firstDate.getDate()).padStart(2, '0');
-booking.date = `${year}-${month}-${day}`;
-currentMonth = firstDate.getMonth();
-currentYear = firstDate.getFullYear();
-
 renderBookingStep();
 </script>
-
 </body>
 </html>
