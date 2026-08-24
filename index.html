@@ -3,156 +3,204 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Réservation Salon de Coiffure</title>
+  <title>Coiffeur 2026 - Réservation</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background: #f4f4f9; color: #333; }
-    .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    h2 { text-align: center; color: #2c3e50; }
-    .coiffeurs-grid { display: flex; gap: 10px; margin-bottom: 15px; }
-    .card { border: 2px solid #ddd; border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; flex: 1; }
-    .card.selected { border-color: #27ae60; background-color: #e8f8f5; }
-    .card img { width: 100%; height: 100px; object-fit: cover; border-radius: 6px; }
-    label { display: block; margin-top: 10px; font-weight: bold; }
-    input, select, button { width: 100%; padding: 10px; margin-top: 5px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }
-    button { background: #27ae60; color: white; font-weight: bold; border: none; margin-top: 15px; cursor: pointer; }
-    button:hover { background: #219150; }
-    .msg { margin-top: 15px; padding: 10px; border-radius: 5px; font-weight: bold; text-align: center; }
-    .error { background: #f8d7da; color: #721c24; }
-    .success { background: #d4edda; color: #155724; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background: #f8f9fa; color: #333; }
+    .booking-card { max-width: 500px; margin: auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+    h2 { text-align: center; margin-bottom: 20px; color: #1a1a1a; }
+    
+    /* Cartes Coiffeurs avec Photos Réelles */
+    .section-label { font-weight: bold; margin: 15px 0 8px; display: block; }
+    .coiffeurs-container { display: flex; gap: 12px; margin-bottom: 15px; }
+    .coiffeur-card { flex: 1; border: 2px solid #e0e0e0; border-radius: 10px; overflow: hidden; cursor: pointer; text-align: center; transition: all 0.2s; }
+    .coiffeur-card img { width: 100%; height: 110px; object-fit: cover; }
+    .coiffeur-card span { display: block; padding: 8px; font-weight: 600; font-size: 14px; }
+    .coiffeur-card.active { border-color: #2563eb; background-color: #eff6ff; }
+    
+    /* Formulaire */
+    input, select, button { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
+    button { background: #2563eb; color: white; font-weight: bold; border: none; cursor: pointer; margin-top: 10px; }
+    button:hover { background: #1d4ed8; }
+    button:disabled { background: #93c5fd; cursor: not-allowed; }
+    
+    /* Alertes */
+    .alert { padding: 10px; border-radius: 6px; text-align: center; font-weight: 600; font-size: 14px; display: none; }
+    .alert-error { background: #fee2e2; color: #991b1b; }
+    .alert-success { background: #dcfce7; color: #166534; }
   </style>
 </head>
 <body>
 
-<div class="container">
+<div class="booking-card">
   <h2>Prendre Rendez-vous</h2>
-  
-  <label>1. Choisissez votre coiffeur :</label>
-  <div class="coiffeurs-grid" id="coiffeursGrid"></div>
 
-  <label for="date">2. Date :</label>
-  <input type="date" id="date" onchange="actualiserHeures()">
+  <span class="section-label">1. Choisissez votre coiffeur :</span>
+  <div class="coiffeurs-container" id="coiffeursList"></div>
 
-  <label for="heure">3. Heure :</label>
-  <select id="heure">
-    <option value="">-- Sélectionnez d'abord une date --</option>
+  <span class="section-label">2. Date :</span>
+  <input type="date" id="selectDate" onchange="genererCreneaux()">
+
+  <span class="section-label">3. Heure disponible :</span>
+  <select id="selectHeure">
+    <option value="">-- Sélectionnez d'abord une date et un coiffeur --</option>
   </select>
 
-  <label for="client">4. Nom du Client :</label>
-  <input type="text" id="client" placeholder="Votre nom complet">
+  <span class="section-label">4. Vos informations :</span>
+  <input type="text" id="clientNom" placeholder="Nom complet">
+  <input type="tel" id="clientPhone" placeholder="Numéro de téléphone">
 
-  <button onclick="validerReservation()">Confirmer la réservation</button>
+  <button id="btnSubmit" onclick="validerRendezVous()">Confirmer la réservation</button>
 
-  <div id="message"></div>
+  <div id="msgAlert" class="alert"></div>
 </div>
 
 <script>
-  // Données des coiffeurs avec images
+  // -------------------------------------------------------------
+  // REMPLACEZ CETTE URL DE TEST PAR VOTRE LIEN APPS SCRIPT APRÈS DÉPLOIEMENT
+  // -------------------------------------------------------------
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz6EztOwc-JVewaMy-uDrE-yluVrJpa1mBoYzYgbS-Vm4ocPFCViqkyuNEQ6J9pQXx2/exec";
+
+  // Liste des coiffeurs
   const coiffeurs = [
-    { id: 1, nom: "Karim", photo: "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=300&q=80" },
-    { id: 2, nom: "Sami", photo: "https://images.unsplash.com/photo-1622286342621-4bd786c2447c?auto=format&fit=crop&w=300&q=80" }
+    { id: "coiff_1", nom: "Karim", photo: "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=400&q=80" },
+    { id: "coiff_2", nom: "Sami", photo: "https://images.unsplash.com/photo-1622286342621-4bd786c2447c?auto=format&fit=crop&w=400&q=80" }
   ];
 
-  // Base de données fictive des créneaux déjà occupés
-  const reservationsExistantes = [
-    { coiffeurId: 1, date: "2026-08-25", heure: "10:00" },
-    { coiffeurId: 1, date: "2026-08-25", heure: "14:00" },
-    { coiffeurId: 2, date: "2026-08-25", heure: "11:00" }
+  // Horaires de travail de la journée
+  const heuresOuverture = ["09:00", "10:00", "11:00", "13:30", "14:30", "15:30", "16:30", "17:30", "18:30"];
+
+  // Cache dynamique des réservations locales pour bloquer le créneau instantanément
+  let reservationsPrises = [
+    { coiffeurId: "coiff_1", date: "2026-08-25", heure: "10:00" },
+    { coiffeurId: "coiff_1", date: "2026-08-25", heure: "14:30" }
   ];
 
-  const creneauxDisponibles = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00"];
   let coiffeurSelectionne = null;
 
-  // Afficher les cartes coiffeurs avec photos
-  function afficherCoiffeurs() {
-    const grid = document.getElementById("coiffeursGrid");
-    grid.innerHTML = "";
+  // Affichage dynamique des cartes avec photos
+  function chargerCoiffeurs() {
+    const container = document.getElementById("coiffeursList");
+    container.innerHTML = "";
     coiffeurs.forEach(c => {
-      grid.innerHTML += `
-        <div class="card" id="card-${c.id}" onclick="selectionnerCoiffeur(${c.id})">
+      container.innerHTML += `
+        <div class="coiffeur-card" id="card-${c.id}" onclick="choisirCoiffeur('${c.id}')">
           <img src="${c.photo}" alt="${c.nom}">
-          <h4>${c.nom}</h4>
+          <span>${c.nom}</span>
         </div>
       `;
     });
   }
 
-  function selectionnerCoiffeur(id) {
+  function choisirCoiffeur(id) {
     coiffeurSelectionne = id;
-    document.querySelectorAll(".card").forEach(el => el.classList.remove("selected"));
-    document.getElementById(`card-${id}`).classList.add("selected");
-    actualiserHeures();
+    document.querySelectorAll('.coiffeur-card').forEach(el => el.classList.remove('active'));
+    document.getElementById(`card-${id}`).classList.add('active');
+    genererCreneaux();
   }
 
-  // Mettre à jour la liste des heures disponibles sans afficher les créneaux pris
-  function actualiserHeures() {
-    const dateInput = document.getElementById("date").value;
-    const heureSelect = document.getElementById("heure");
-    heureSelect.innerHTML = "";
+  // Filtrage des heures disponibles par date et coiffeur
+  function genererCreneaux() {
+    const dateInput = document.getElementById("selectDate").value;
+    const selectHeure = document.getElementById("selectHeure");
+    selectHeure.innerHTML = "";
 
     if (!coiffeurSelectionne) {
-      heureSelect.innerHTML = '<option value="">-- Choisissez un coiffeur d\'abord --</option>';
+      selectHeure.innerHTML = '<option value="">-- Choisissez un coiffeur d\'abord --</option>';
       return;
     }
-
     if (!dateInput) {
-      heureSelect.innerHTML = '<option value="">-- Sélectionnez une date --</option>';
+      selectHeure.innerHTML = '<option value="">-- Sélectionnez une date --</option>';
       return;
     }
 
-    // Filtrer les heures libres pour ce coiffeur précis à cette date
-    const heuresLibres = creneauxDisponibles.filter(heure => {
-      const dejaPris = reservationsExistantes.some(r => 
-        r.coiffeurId === coiffeurSelectionne && 
-        r.date === dateInput && 
-        r.heure === heure
-      );
-      return !dejaPris;
-    });
+    // Récupérer les créneaux déjà réservés pour ce coiffeur précis à cette date
+    const heuresOccupees = reservationsPrises
+      .filter(r => r.coiffeurId === coiffeurSelectionne && r.date === dateInput)
+      .map(r => r.heure);
 
-    if (heuresLibres.length === 0) {
-      heureSelect.innerHTML = '<option value="">Aucun créneau disponible pour cette date</option>';
+    const heuresDisponibles = heuresOuverture.filter(h => !heuresOccupees.includes(h));
+
+    if (heuresDisponibles.length === 0) {
+      selectHeure.innerHTML = '<option value="">Aucun créneau disponible pour cette date</option>';
     } else {
-      heuresLibres.forEach(heure => {
-        heureSelect.innerHTML += `<option value="${heure}">${heure}</option>`;
+      selectHeure.innerHTML = '<option value="">-- Choisissez une heure --</option>';
+      heuresDisponibles.forEach(h => {
+        selectHeure.innerHTML += `<option value="${h}">${h}</option>`;
       });
     }
   }
 
-  // Validation et enregistrement du rendez-vous
-  function validerReservation() {
-    const date = document.getElementById("date").value;
-    const heure = document.getElementById("heure").value;
-    const client = document.getElementById("client").value.trim();
-    const msgDiv = document.getElementById("message");
+  // Envoi de la réservation vers Apps Script / API
+  function validerRendezVous() {
+    const date = document.getElementById("selectDate").value;
+    const heure = document.getElementById("selectHeure").value;
+    const nom = document.getElementById("clientNom").value.trim();
+    const phone = document.getElementById("clientPhone").value.trim();
+    const btn = document.getElementById("btnSubmit");
 
-    if (!coiffeurSelectionne || !date || !heure || !client) {
-      msgDiv.className = "msg error";
-      msgDiv.textContent = "Veuillez remplir tous les champs.";
+    if (!coiffeurSelectionne || !date || !heure || !nom || !phone) {
+      afficherMessage("Veuillez remplir tous les champs du formulaire.", "error");
       return;
     }
 
-    // Double vérification de la disponibilité
-    const dejaOccupe = reservationsExistantes.some(r => 
-      r.coiffeurId === coiffeurSelectionne && r.date === date && r.heure === heure
-    );
-
-    if (dejaOccupe) {
-      msgDiv.className = "msg error";
-      msgDiv.textContent = "Ce créneau vient juste d'être réservé, choisissez une autre heure.";
+    // Vérification de sécurité anti-doublon
+    const dejaPris = reservationsPrises.some(r => r.coiffeurId === coiffeurSelectionne && r.date === date && r.heure === heure);
+    if (dejaPris) {
+      afficherMessage("Ce créneau est déjà réservé. Veuillez choisir une autre heure.", "error");
+      genererCreneaux();
       return;
     }
 
-    // Ajout à la base locale
-    reservationsExistantes.push({ coiffeurId: coiffeurSelectionne, date, heure, client });
-    
-    msgDiv.className = "msg success";
-    msgDiv.textContent = `Réservation confirmée pour ${client} à ${heure} le ${date} !`;
-    
-    actualiserHeures(); // Mise à jour dynamique des créneaux
+    const coiffeurInfo = coiffeurs.find(c => c.id === coiffeurSelectionne);
+
+    const payload = {
+      coiffeurId: coiffeurSelectionne,
+      coiffeurNom: coiffeurInfo ? coiffeurInfo.nom : coiffeurSelectionne,
+      date: date,
+      heure: heure,
+      nom: nom,
+      phone: phone
+    };
+
+    btn.disabled = true;
+    btn.textContent = "Envoi en cours...";
+
+    fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+    .then(() => {
+      // Bloquer le créneau en local dès le succès de la requête
+      reservationsPrises.push({ coiffeurId: coiffeurSelectionne, date: date, heure: heure });
+
+      afficherMessage(`Réservation confirmée avec succès pour ${nom} !`, "success");
+      
+      // Réinitialisation du formulaire
+      document.getElementById("clientNom").value = "";
+      document.getElementById("clientPhone").value = "";
+      
+      btn.disabled = false;
+      btn.textContent = "Confirmer la réservation";
+      genererCreneaux();
+    })
+    .catch(err => {
+      console.error("Erreur d'envoi:", err);
+      afficherMessage("Erreur lors de l'enregistrement. Veuillez réespayer.", "error");
+      btn.disabled = false;
+      btn.textContent = "Confirmer la réservation";
+    });
   }
 
-  // Initialisation au chargement de la page
-  afficherCoiffeurs();
+  function afficherMessage(texte, type) {
+    const box = document.getElementById("msgAlert");
+    box.style.display = "block";
+    box.className = `alert ${type === "error" ? "alert-error" : "alert-success"}`;
+    box.textContent = texte;
+  }
+
+  // Chargement initial
+  chargerCoiffeurs();
 </script>
 
 </body>
