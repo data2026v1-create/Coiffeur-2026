@@ -400,7 +400,7 @@ td{padding:14px 16px;border-top:1px solid var(--border);vertical-align:middle;}
 const API_URL = 'https://script.google.com/macros/s/AKfycbzB8vhbCqQaB40qV50eNSwU04HucuMnm8GsIN1vHhbaX-DEOT8SbhDN6Z_AJzosmqkR/exec';
 const POLL_MS = 5000;
 
-// ========== DONNÉES DE DÉMONSTRATION ==========
+// ========== DONNÉES DE DÉMONSTRATION (prêtes à l'emploi) ==========
 const DEMO_DATA = {
   services: [
     ['SVC-1', { nom: 'Coupe Homme', tarif: 1500, duree: 30 }],
@@ -451,13 +451,17 @@ const STATUT_CODE_TO_FR = { attente:'En attente', confirme:'Confirmé', annule:'
 
 let appData = { services: [], coiffeurs: [], reservations: [], galerie: [], settings: { ...DEFAULT_SETTINGS } };
 let firstSync = true;
-let useDemoData = false;
+let useDemoData = true; // Toujours utiliser les données de démo
 
 let booking = { step: 1, services: [], coiffeurId: null, coiffeurNom: null, date: null, heure: null, nom: '', tel: '' };
 let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
 
-// ========== APPEL API ==========
+// ========== CHARGEMENT IMMÉDIAT DES DONNÉES DÉMO ==========
+appData = { ...DEMO_DATA };
+document.getElementById('status-cloud').innerHTML = '<span style="color:var(--warning);">● MODE DÉMO</span>';
+
+// ========== APPEL API (optionnel, ne bloque pas) ==========
 async function apiGet(){
   try {
     const res = await fetch(API_URL, { cache: 'no-store' });
@@ -467,7 +471,6 @@ async function apiGet(){
     throw new Error('API Error');
   } catch (err) {
     console.warn('API indisponible, utilisation des données de démonstration');
-    useDemoData = true;
     return null;
   }
 }
@@ -555,12 +558,13 @@ async function syncAndRender(){
       useDemoData = false;
       document.getElementById('status-cloud').innerHTML = '<span style="color:var(--success);">● SYNC ACTIVE</span>';
     } else {
-      appData = normalizeData(null);
+      // Garder les données démo
+      appData = { ...DEMO_DATA };
       document.getElementById('status-cloud').innerHTML = '<span style="color:var(--warning);">● MODE DÉMO</span>';
     }
   } catch (err) {
     console.error('Erreur:', err);
-    appData = normalizeData(null);
+    appData = { ...DEMO_DATA };
     document.getElementById('status-cloud').innerHTML = '<span style="color:var(--warning);">● MODE DÉMO</span>';
   } finally {
     applyBranding();
@@ -735,7 +739,6 @@ function getFirstAvailableDate() {
     const dayOfWeek = cursor.getDay();
     const isClosed = (appData.settings.joursFermeture || []).includes(dayOfWeek);
     if (!isClosed) {
-      // Vérifier qu'il y a des créneaux pour ce jour
       const dateStr = `${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,'0')}-${String(cursor.getDate()).padStart(2,'0')}`;
       const slots = getAvailableSlotsForDate(dateStr);
       if (slots.length > 0) return new Date(cursor);
@@ -785,7 +788,6 @@ function generateSlotsForDate(date) {
   const currentMinutes = today.getHours() * 60 + today.getMinutes();
   const minTime = isToday ? currentMinutes + 30 : 0;
 
-  // Générer des créneaux de 9h à 20h
   while (t + step <= end) {
     if (t > minTime) {
       const h = String(Math.floor(t/60)).padStart(2,'0');
@@ -837,22 +839,12 @@ function renderCalendar() {
     
     let disabled = false;
     
-    // Date passée
-    if (d < today) {
-      disabled = true;
-    }
+    if (d < today) disabled = true;
+    if ((appData.settings.joursFermeture || []).includes(d.getDay())) disabled = true;
     
-    // Jour de fermeture
-    if ((appData.settings.joursFermeture || []).includes(d.getDay())) {
-      disabled = true;
-    }
-    
-    // Vérifier s'il y a des créneaux disponibles
     if (!disabled) {
       const availableSlots = getAvailableSlotsForDate(iso);
-      if (availableSlots.length === 0) {
-        disabled = true;
-      }
+      if (availableSlots.length === 0) disabled = true;
     }
 
     const sel = booking.date === iso ? 'selected' : '';
@@ -1318,7 +1310,18 @@ window.saveSettings = async () => {
   syncAndRender();
 };
 
-// Initialisation
+// Initialisation immédiate avec les données démo
+applyBranding();
+renderClientServices();
+renderClientCoiffeurs();
+renderClientGalerie();
+renderDashboard();
+renderReservationsTable();
+renderServicesAdmin();
+renderCoiffeursAdmin();
+renderGalerieAdmin();
+fillSettingsForm();
+document.getElementById('loader').classList.add('masque');
 renderBookingStep();
 </script>
 
