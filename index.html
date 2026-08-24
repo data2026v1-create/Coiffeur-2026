@@ -396,11 +396,10 @@ td{padding:14px 16px;border-top:1px solid var(--border);vertical-align:middle;}
 // Contact: 0770938972
 // ============================================================
 
-// ⚠️ REMPLACEZ CETTE URL PAR LA VÔTRE APRÈS DÉPLOIEMENT
 const API_URL = 'https://script.google.com/macros/s/AKfycbzB8vhbCqQaB40qV50eNSwU04HucuMnm8GsIN1vHhbaX-DEOT8SbhDN6Z_AJzosmqkR/exec';
 const POLL_MS = 5000;
 
-// ========== DONNÉES DE DÉMONSTRATION (prêtes à l'emploi) ==========
+// ========== DONNÉES DE DÉMONSTRATION ==========
 const DEMO_DATA = {
   services: [
     ['SVC-1', { nom: 'Coupe Homme', tarif: 1500, duree: 30 }],
@@ -449,19 +448,14 @@ const JOURS = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'
 const STATUT_FR_TO_CODE = { 'en attente':'attente', 'confirmé':'confirme', 'confirme':'confirme', 'annulé':'annule', 'annule':'annule' };
 const STATUT_CODE_TO_FR = { attente:'En attente', confirme:'Confirmé', annule:'Annulé' };
 
-let appData = { services: [], coiffeurs: [], reservations: [], galerie: [], settings: { ...DEFAULT_SETTINGS } };
+let appData = { ...DEMO_DATA };
 let firstSync = true;
-let useDemoData = true; // Toujours utiliser les données de démo
 
 let booking = { step: 1, services: [], coiffeurId: null, coiffeurNom: null, date: null, heure: null, nom: '', tel: '' };
 let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
 
-// ========== CHARGEMENT IMMÉDIAT DES DONNÉES DÉMO ==========
-appData = { ...DEMO_DATA };
-document.getElementById('status-cloud').innerHTML = '<span style="color:var(--warning);">● MODE DÉMO</span>';
-
-// ========== APPEL API (optionnel, ne bloque pas) ==========
+// ========== APPEL API ==========
 async function apiGet(){
   try {
     const res = await fetch(API_URL, { cache: 'no-store' });
@@ -555,16 +549,12 @@ async function syncAndRender(){
     const raw = await apiGet();
     if (raw && !raw.error) {
       appData = normalizeData(raw);
-      useDemoData = false;
       document.getElementById('status-cloud').innerHTML = '<span style="color:var(--success);">● SYNC ACTIVE</span>';
     } else {
-      // Garder les données démo
-      appData = { ...DEMO_DATA };
       document.getElementById('status-cloud').innerHTML = '<span style="color:var(--warning);">● MODE DÉMO</span>';
     }
   } catch (err) {
     console.error('Erreur:', err);
-    appData = { ...DEMO_DATA };
     document.getElementById('status-cloud').innerHTML = '<span style="color:var(--warning);">● MODE DÉMO</span>';
   } finally {
     applyBranding();
@@ -739,9 +729,7 @@ function getFirstAvailableDate() {
     const dayOfWeek = cursor.getDay();
     const isClosed = (appData.settings.joursFermeture || []).includes(dayOfWeek);
     if (!isClosed) {
-      const dateStr = `${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,'0')}-${String(cursor.getDate()).padStart(2,'0')}`;
-      const slots = getAvailableSlotsForDate(dateStr);
-      if (slots.length > 0) return new Date(cursor);
+      return new Date(cursor);
     }
     cursor.setDate(cursor.getDate() + 1);
     guard++;
@@ -749,10 +737,30 @@ function getFirstAvailableDate() {
   return new Date();
 }
 
-function getAvailableSlotsForDate(date) {
-  const slots = generateSlotsForDate(date);
-  const taken = getTakenSlotsForDate(date);
-  return slots.filter(slot => !taken.includes(slot));
+function generateSlotsForDate(date) {
+  const [oh, om] = (appData.settings.ouverture || '09:00').split(':').map(Number);
+  const [fh, fm] = (appData.settings.fermeture || '20:00').split(':').map(Number);
+  const slots = [];
+  let t = oh * 60 + om;
+  const end = fh * 60 + fm;
+  const step = Number(appData.settings.dureeSlot) || 30;
+  
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  const isToday = date === todayStr;
+  const currentMinutes = today.getHours() * 60 + today.getMinutes();
+  const minTime = isToday ? currentMinutes + 30 : 0;
+
+  // TOUJOURS générer des créneaux pour les jours ouverts
+  while (t + step <= end) {
+    if (t > minTime) {
+      const h = String(Math.floor(t/60)).padStart(2,'0');
+      const m = String(t%60).padStart(2,'0');
+      slots.push(`${h}:${m}`);
+    }
+    t += step;
+  }
+  return slots;
 }
 
 function getTakenSlotsForDate(date) {
@@ -774,29 +782,11 @@ function getTakenSlotsForDate(date) {
   return taken;
 }
 
-function generateSlotsForDate(date) {
-  const [oh, om] = (appData.settings.ouverture || '09:00').split(':').map(Number);
-  const [fh, fm] = (appData.settings.fermeture || '20:00').split(':').map(Number);
-  const slots = [];
-  let t = oh * 60 + om;
-  const end = fh * 60 + fm;
-  const step = Number(appData.settings.dureeSlot) || 30;
-  
-  const today = new Date();
-  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-  const isToday = date === todayStr;
-  const currentMinutes = today.getHours() * 60 + today.getMinutes();
-  const minTime = isToday ? currentMinutes + 30 : 0;
-
-  while (t + step <= end) {
-    if (t > minTime) {
-      const h = String(Math.floor(t/60)).padStart(2,'0');
-      const m = String(t%60).padStart(2,'0');
-      slots.push(`${h}:${m}`);
-    }
-    t += step;
-  }
-  return slots;
+function getAvailableSlotsForDate(date) {
+  const slots = generateSlotsForDate(date);
+  const taken = getTakenSlotsForDate(date);
+  // Filtrer les créneaux pris
+  return slots.filter(slot => !taken.includes(slot));
 }
 
 function renderCalendar() {
@@ -839,12 +829,22 @@ function renderCalendar() {
     
     let disabled = false;
     
-    if (d < today) disabled = true;
-    if ((appData.settings.joursFermeture || []).includes(d.getDay())) disabled = true;
+    // Date passée
+    if (d < today) {
+      disabled = true;
+    }
     
+    // Jour de fermeture
+    if ((appData.settings.joursFermeture || []).includes(d.getDay())) {
+      disabled = true;
+    }
+    
+    // Vérifier si le jour a des créneaux disponibles
     if (!disabled) {
       const availableSlots = getAvailableSlotsForDate(iso);
-      if (availableSlots.length === 0) disabled = true;
+      if (availableSlots.length === 0) {
+        disabled = true;
+      }
     }
 
     const sel = booking.date === iso ? 'selected' : '';
@@ -1310,7 +1310,8 @@ window.saveSettings = async () => {
   syncAndRender();
 };
 
-// Initialisation immédiate avec les données démo
+// ========== INITIALISATION IMMÉDIATE ==========
+// Les données de démonstration sont déjà chargées dans appData
 applyBranding();
 renderClientServices();
 renderClientCoiffeurs();
