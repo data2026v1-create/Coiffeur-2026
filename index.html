@@ -119,7 +119,6 @@ header{height:70px;border-bottom:1px solid var(--border);display:flex;align-item
 .time-chip:hover:not(.taken){border-color:var(--gold);}
 .time-chip.selected{background:var(--gold);color:#000;border-color:var(--gold);font-weight:700;}
 .time-chip.taken{opacity:.4;text-decoration:line-through;cursor:not-allowed;}
-.time-chip .lock-icon{font-size:.65rem;margin-left:3px;}
 
 /* ===== TICKET BAR ===== */
 .ticket-bar{position:fixed;bottom:0;left:0;right:0;background:var(--bg-elev);border-top:1px dashed var(--border);z-index:900;transform:translateY(100%);transition:transform .3s ease;box-shadow:0 -10px 30px rgba(0,0,0,.4);}
@@ -442,16 +441,29 @@ let currentYear = new Date().getFullYear();
 
 // ---------- APPEL API ----------
 async function apiGet(){
-  const res = await fetch(API_URL);
-  return res.json();
+  try {
+    const res = await fetch(API_URL);
+    if (!res.ok) throw new Error('Erreur HTTP ' + res.status);
+    return await res.json();
+  } catch (err) {
+    console.error('Erreur apiGet:', err);
+    return null;
+  }
 }
+
 async function apiPost(action, payload){
-  const res = await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ action, ...payload })
-  });
-  return res.json();
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action, ...payload })
+    });
+    if (!res.ok) throw new Error('Erreur HTTP ' + res.status);
+    return await res.json();
+  } catch (err) {
+    console.error('Erreur apiPost:', err);
+    return null;
+  }
 }
 
 function parseFrDate(str){
@@ -564,8 +576,12 @@ function normalizeData(raw){
 async function syncAndRender(){
   try {
     const raw = await apiGet();
-    appData = normalizeData(raw);
-    document.getElementById('status-cloud').innerHTML = '<span style="color:var(--success);">● SYNC ACTIVE</span>';
+    if (raw && !raw.error) {
+      appData = normalizeData(raw);
+      document.getElementById('status-cloud').innerHTML = '<span style="color:var(--success);">● SYNC ACTIVE</span>';
+    } else {
+      document.getElementById('status-cloud').innerHTML = '<span style="color:var(--warning);">● SYNC ERREUR</span>';
+    }
   } catch (err) {
     console.error('Erreur de synchronisation Sheets:', err);
     document.getElementById('status-cloud').innerHTML = '<span style="color:var(--danger);">● SYNC HORS LIGNE</span>';
@@ -584,8 +600,11 @@ async function syncAndRender(){
   }
 }
 
-syncAndRender();
-setInterval(syncAndRender, POLL_MS);
+// Démarrer le chargement après un court délai pour permettre au DOM de se charger
+setTimeout(() => {
+  syncAndRender();
+  setInterval(syncAndRender, POLL_MS);
+}, 500);
 
 function money(n){ return `${n} ${appData.settings.devise || 'DA'}`; }
 
@@ -732,7 +751,7 @@ function renderClientGalerie(){
   }
 }
 
-// ================= CLIENT : DATE & HEURE (STEP 3) - CORRIGÉ =================
+// ================= CLIENT : DATE & HEURE (STEP 3) =================
 function getFirstAvailableDate() {
   let cursor = new Date();
   cursor.setHours(0, 0, 0, 0);
@@ -762,18 +781,13 @@ function getTakenSlotsForDate(date) {
   const coiffeurId = booking.coiffeurId || null;
   
   appData.reservations.forEach(([key, r]) => {
-    // Ne pas prendre en compte les réservations annulées
     if (r.statut === 'annule') return;
-    
-    // Même date
     if (r.date === date) {
-      // Si un coiffeur est sélectionné, vérifier les conflits
       if (coiffeurId && coiffeurId !== 'any') {
         if (r.coiffeurNom === booking.coiffeurNom) {
           if (r.heure) taken.push(r.heure);
         }
       } else {
-        // Si "Sans préférence", prendre tous les créneaux occupés
         if (r.heure) taken.push(r.heure);
       }
     }
@@ -790,13 +804,11 @@ function generateSlotsForDate(date) {
   const end = fh * 60 + fm;
   const step = Number(appData.settings.dureeSlot) || 30;
   
-  // Vérifier si c'est aujourd'hui
   const today = new Date();
   const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
   const isToday = date === todayStr;
   const currentMinutes = today.getHours() * 60 + today.getMinutes();
   
-  // Ajouter un délai minimum de 30 minutes pour les réservations du jour
   const minTime = isToday ? currentMinutes + 30 : 0;
 
   while (t + step <= end) {
@@ -809,11 +821,6 @@ function generateSlotsForDate(date) {
   }
   
   return slots;
-}
-
-function generateSlots() {
-  if (!booking.date) return [];
-  return generateSlotsForDate(booking.date);
 }
 
 function renderCalendar() {
@@ -856,17 +863,14 @@ function renderCalendar() {
     
     let disabled = false;
     
-    // Date passée
     if (d < today) {
       disabled = true;
     }
     
-    // Jour de fermeture
     if ((appData.settings.joursFermeture || []).includes(d.getDay())) {
       disabled = true;
     }
     
-    // Vérifier s'il reste des créneaux disponibles pour cette date
     if (!disabled) {
       const availableSlots = getAvailableSlotsForDate(iso);
       if (availableSlots.length === 0) {
@@ -912,7 +916,7 @@ function renderTimeGrid() {
     const isTaken = taken.includes(s);
     const sel = booking.heure === s ? 'selected' : '';
     return `<div class="time-chip ${sel} ${isTaken ? 'taken' : ''}" onclick="${isTaken ? '' : `selectHeure('${s}')`}">
-      ${s} ${isTaken ? '<span class="lock-icon">🔒</span>' : ''}
+      ${s} ${isTaken ? '🔒' : ''}
     </div>`;
   }).join('');
 }
@@ -1090,4 +1094,277 @@ async function submitReservation(){
 }
 
 window.resetBooking = () => {
-  booking = { step: 1, services: [], coiffeurId: null, coiffeurNom
+  booking = { step: 1, services: [], coiffeurId: null, coiffeurNom: null, date: null, heure: null, nom: '', tel: '' };
+  document.getElementById('input-nom').value = '';
+  document.getElementById('input-tel').value = '';
+  renderClientServices();
+  renderClientCoiffeurs();
+  renderBookingStep();
+};
+
+// ================= ADMIN : DASHBOARD =================
+let myChart;
+function renderDashboard(){
+  let totalCA = 0, countAttente = 0;
+  const serviceStats = {};
+  appData.reservations.forEach(([k,r]) => {
+    if (r.statut !== 'annule') totalCA += Number(r.total || 0);
+    if (r.statut === 'attente') countAttente++;
+    (r.prestations||[]).forEach(p => { serviceStats[p.nom] = (serviceStats[p.nom]||0)+1; });
+  });
+  document.getElementById('kpi-ca').textContent = money(totalCA);
+  document.getElementById('kpi-total').textContent = appData.reservations.length;
+  document.getElementById('kpi-attente').textContent = `${countAttente} en attente`;
+  const top = Object.entries(serviceStats).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById('kpi-top').textContent = top ? top[0] : 'Aucun';
+  document.getElementById('kpi-coiffeurs').textContent = appData.coiffeurs.length;
+
+  const recent = [...appData.reservations].sort((a,b)=> (b[1].creeLe||0)-(a[1].creeLe||0)).slice(0,6);
+  const tbody = document.getElementById('dash-table-body');
+  tbody.innerHTML = recent.length ? recent.map(([k,r]) => rowHtml(r,false)).join('') :
+    `<tr><td colspan="5" class="empty-row">Aucune réservation pour le moment</td></tr>`;
+
+  const dataMap = {};
+  appData.reservations.forEach(([k,r]) => { dataMap[r.date] = (dataMap[r.date]||0)+1; });
+  const labels = Object.keys(dataMap).sort();
+  const values = labels.map(l => dataMap[l]);
+  const ctx = document.getElementById('chartActivity').getContext('2d');
+  if (myChart) myChart.destroy();
+  myChart = new Chart(ctx, {
+    type:'line',
+    data:{ labels, datasets:[{ label:'Rendez-vous', data: values, borderColor:'#c9a227', tension:.4, fill:true, backgroundColor:'rgba(201,162,39,.12)' }] },
+    options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true, grid:{color:'#2a2a30'}, ticks:{color:'#8c8c94'}}, x:{grid:{color:'#2a2a30'}, ticks:{color:'#8c8c94'}} } }
+  });
+}
+
+function rowHtml(r, withActions, key){
+  return `<tr>
+    <td><div style="font-weight:600;">${r.clientNom}</div><div style="font-size:.75rem;color:var(--text-muted);">${r.clientTel}</div></td>
+    <td>${(r.prestations||[]).map(p=>p.nom).join(', ')||'N/A'}</td>
+    ${withActions ? `<td>${r.coiffeurNom||'—'}</td>` : ''}
+    <td><div>${new Date(r.date).toLocaleDateString('fr-FR')}</div><div style="color:var(--gold);font-weight:700;font-family:var(--font-mono);">${r.heure}</div></td>
+    <td style="font-family:var(--font-mono);">${money(r.total)}</td>
+    <td><span class="status status-${r.statut||'confirme'}">${STATUT_CODE_TO_FR[r.statut]||'Confirmé'}</span></td>
+    ${withActions ? `<td><div style="display:flex;gap:5px;">
+        <button class="btn btn-outline btn-sm" title="Confirmer" onclick="window.updateStatus('${key}','confirme')"><i class="fa-solid fa-check"></i></button>
+        <button class="btn btn-outline btn-sm" title="Annuler" onclick="window.updateStatus('${key}','annule')"><i class="fa-solid fa-xmark"></i></button>
+        <button class="btn btn-danger btn-sm" title="Supprimer" onclick="window.deleteResa('${key}')"><i class="fa-solid fa-trash"></i></button>
+      </div></td>` : ''}
+  </tr>`;
+}
+
+function renderReservationsTable(){
+  const tbody = document.getElementById('admin-table-body');
+  if (!tbody) return;
+  const statutFilter = document.getElementById('filter-statut')?.value || '';
+  const search = (document.getElementById('filter-search')?.value || '').toLowerCase();
+  let rows = appData.reservations.filter(([k,r]) => {
+    if (statutFilter && (r.statut||'confirme') !== statutFilter) return false;
+    if (search && !r.clientNom.toLowerCase().includes(search)) return false;
+    return true;
+  }).sort((a,b)=> (b[1].creeLe||0)-(a[1].creeLe||0));
+  tbody.innerHTML = rows.length ? rows.map(([k,r]) => rowHtml(r, true, k)).join('') :
+    `<tr><td colspan="7" class="empty-row">Aucune réservation trouvée</td></tr>`;
+}
+
+window.updateStatus = async (id, status) => { 
+  const result = await apiPost('updateReservationStatus', { id, statut: STATUT_CODE_TO_FR[status] }); 
+  if (result) syncAndRender(); 
+};
+window.deleteResa = async (id) => { 
+  if (confirm('Supprimer définitivement cette réservation ?')) { 
+    const result = await apiPost('deleteReservation', { id }); 
+    if (result) syncAndRender(); 
+  } 
+};
+
+window.exportData = () => {
+  const header = ['Client','Téléphone','Services','Coiffeur','Date','Heure','Total','Statut'];
+  const lines = appData.reservations.map(([k,r]) => [
+    r.clientNom, r.clientTel, (r.prestations||[]).map(p=>p.nom).join(' + '),
+    r.coiffeurNom||'', r.date, r.heure, r.total, STATUT_CODE_TO_FR[r.statut]||'Confirmé'
+  ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
+  const csv = [header.join(','), ...lines].join('\n');
+  const blob = new Blob(["\uFEFF"+csv], { type:'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `reservations_${Date.now()}.csv`; a.click();
+  URL.revokeObjectURL(url);
+};
+
+// ================= ADMIN : SERVICES CRUD =================
+function renderServicesAdmin(){
+  const el = document.getElementById('services-list');
+  el.innerHTML = appData.services.length ? appData.services.map(([key,s]) => `
+    <div class="list-card">
+      <div>
+        <div style="font-weight:600;">${s.nom}</div>
+        <div class="meta">${money(s.tarif)} · ${s.duree} min</div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-outline btn-sm" onclick='openServiceModal(${JSON.stringify(key)})'><i class="fa-solid fa-pen"></i></button>
+        <button class="btn btn-danger btn-sm" onclick="deleteService('${key}')"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    </div>`).join('') : `<div class="section-sub">Aucun service. Ajoutez-en un pour commencer.</div>`;
+}
+window.openServiceModal = (key) => {
+  const existing = key ? appData.services.find(([k])=>k===key)?.[1] : null;
+  openModal(existing ? 'Modifier le service' : 'Nouveau service', `
+    <div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="svc-nom" value="${existing?.nom||''}"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Tarif (${appData.settings.devise})</label><input type="number" class="form-input" id="svc-tarif" value="${existing?.tarif||''}"></div>
+      <div class="form-group"><label class="form-label">Durée (min)</label><input type="number" class="form-input" id="svc-duree" value="${existing?.duree||''}"></div>
+    </div>`,
+    `<button class="btn btn-outline" onclick="closeModal()">Annuler</button>
+     <button class="btn btn-primary" onclick="saveService(${key?`'${key}'`:'null'})">Enregistrer</button>`);
+};
+window.saveService = async (key) => {
+  const nom = document.getElementById('svc-nom').value.trim();
+  const tarif = Number(document.getElementById('svc-tarif').value);
+  const duree = Number(document.getElementById('svc-duree').value);
+  if (!nom || !tarif || !duree) return;
+  const result = await apiPost('saveService', { data: { id: key, nom, tarif, duree } });
+  closeModal();
+  if (result) syncAndRender();
+};
+window.deleteService = async (key) => { 
+  if (confirm('Supprimer ce service ?')) { 
+    const result = await apiPost('deleteService', { id: key }); 
+    if (result) syncAndRender(); 
+  } 
+};
+
+// ================= ADMIN : COIFFEURS CRUD =================
+function renderCoiffeursAdmin(){
+  const el = document.getElementById('coiffeurs-list');
+  el.innerHTML = appData.coiffeurs.length ? appData.coiffeurs.map(([key,c]) => {
+    const fallbackUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(c.nom||'Barber')}&background=c9a227&color=000`;
+    const avatarContent = c.image ? `<img src="${c.image}" style="width:100%;height:100%;object-fit:cover;" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${fallbackUrl}'">` : `<span style="font-weight:bold;font-size:1.1rem;color:#000;">${(c.nom||'?').charAt(0).toUpperCase()}</span>`;
+    return `
+    <div class="list-card" style="display:flex;align-items:center;gap:15px;">
+      <div style="width:45px;height:45px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-light));display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
+        ${avatarContent}
+      </div>
+      <div style="flex:1;">
+        <div style="font-weight:600;">${c.nom}</div>
+        <div class="meta">${c.specialite||'Barbier'}</div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-outline btn-sm" onclick='openCoiffeurModal(${JSON.stringify(key)})'><i class="fa-solid fa-pen"></i></button>
+        <button class="btn btn-danger btn-sm" onclick="deleteCoiffeur('${key}')"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    </div>`;
+  }).join('') : `<div class="section-sub">Aucun coiffeur. Ajoutez-en un pour commencer.</div>`;
+}
+window.openCoiffeurModal = (key) => {
+  const existing = key ? appData.coiffeurs.find(([k])=>k===key)?.[1] : null;
+  openModal(existing ? 'Modifier le coiffeur' : 'Nouveau coiffeur', `
+    <div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="cof-nom" value="${existing?.nom||''}"></div>
+    <div class="form-group"><label class="form-label">Spécialité</label><input class="form-input" id="cof-spe" value="${existing?.specialite||''}" placeholder="Ex: Dégradé, Barbe..."></div>
+    <div class="form-group">
+      <label class="form-label">URL Image (Optionnel)</label>
+      <input class="form-input" id="cof-img" value="${existing?.image||''}" placeholder="https://...">
+      <div style="font-size:0.75rem; color:var(--text-muted); margin-top:6px;">
+        ⚠️ Pour Google Drive : assurez-vous que le lien est réglé sur <strong>"Tous les utilisateurs disposant du lien"</strong>.
+      </div>
+    </div>`,
+    `<button class="btn btn-outline" onclick="closeModal()">Annuler</button>
+     <button class="btn btn-primary" onclick="saveCoiffeur(${key?`'${key}'`:'null'})">Enregistrer</button>`);
+};
+window.saveCoiffeur = async (key) => {
+  const nom = document.getElementById('cof-nom').value.trim();
+  const specialite = document.getElementById('cof-spe').value.trim();
+  const image = formatImageUrl(document.getElementById('cof-img').value);
+  if (!nom) return;
+  const result = await apiPost('saveCoiffeur', { data: { id: key, nom, specialite, image } });
+  closeModal();
+  if (result) syncAndRender();
+};
+window.deleteCoiffeur = async (key) => { 
+  if (confirm('Supprimer ce coiffeur ?')) { 
+    const result = await apiPost('deleteCoiffeur', { id: key }); 
+    if (result) syncAndRender(); 
+  } 
+};
+
+// ================= ADMIN : GALERIE CRUD =================
+function renderGalerieAdmin(){
+  const el = document.getElementById('galerie-list');
+  el.innerHTML = appData.galerie.length ? appData.galerie.map(([key,g]) => `
+    <div class="gallery-item" style="position:relative;">
+      <img src="${g.url}" alt="Galerie" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1599351431202-1e0f0137899a?q=80&w=400&auto=format&fit=crop'">
+      <button class="btn btn-danger btn-sm" style="position:absolute; top:8px; right:8px; padding:4px 8px;" onclick="deleteGalerie('${key}')"><i class="fa-solid fa-trash"></i></button>
+    </div>`).join('') : `<div class="section-sub">Aucune photo dans la galerie.</div>`;
+}
+window.openGalerieModal = () => {
+  openModal('Ajouter une photo', `
+    <div class="form-group">
+      <label class="form-label">URL de l'image (Google Drive ou Direct)</label>
+      <input class="form-input" id="gal-url" placeholder="https://...">
+      <div style="font-size:0.75rem; color:var(--text-muted); margin-top:6px;">
+        ⚠️ Pour Google Drive : assurez-vous que le lien est réglé sur <strong>"Tous les utilisateurs disposant du lien"</strong>.
+      </div>
+    </div>`,
+    `<button class="btn btn-outline" onclick="closeModal()">Annuler</button>
+     <button class="btn btn-primary" onclick="saveGalerie()">Enregistrer</button>`);
+};
+window.saveGalerie = async () => {
+  const url = formatImageUrl(document.getElementById('gal-url').value);
+  if (!url) return;
+  const result = await apiPost('saveGalerie', { data: { url } });
+  closeModal();
+  if (result) syncAndRender();
+};
+window.deleteGalerie = async (key) => { 
+  if (confirm('Supprimer cette photo ?')) { 
+    const result = await apiPost('deleteGalerie', { id: key }); 
+    if (result) syncAndRender(); 
+  } 
+};
+
+// ================= ADMIN : PARAMETRES =================
+function fillSettingsForm(){
+  const s = appData.settings;
+  document.getElementById('set-nom').value = s.nomSalon;
+  document.getElementById('set-devise').value = s.devise;
+  document.getElementById('set-adresse').value = s.adresse;
+  document.getElementById('set-tel').value = s.telephone;
+  document.getElementById('set-ouverture').value = s.ouverture;
+  document.getElementById('set-fermeture').value = s.fermeture;
+  document.getElementById('set-duree').value = s.dureeSlot;
+  document.getElementById('set-about-title').value = s.aboutTitle || '';
+  document.getElementById('set-about-text').value = s.aboutText || '';
+  document.getElementById('set-footer').value = s.footerText || '';
+  document.getElementById('set-jours').innerHTML = JOURS.map((j,i) => {
+    const checked = (s.joursFermeture||[]).includes(i);
+    return `<div class="form-check-pill ${checked?'checked':''}" data-day="${i}" onclick="this.classList.toggle('checked')">${j}</div>`;
+  }).join('');
+}
+window.saveSettings = async () => {
+  const joursFermeture = [...document.querySelectorAll('#set-jours .form-check-pill.checked')].map(el => Number(el.dataset.day));
+  const payload = {
+    nomSalon: document.getElementById('set-nom').value.trim() || 'Barber Pro DZ',
+    devise: document.getElementById('set-devise').value.trim() || 'DA',
+    adresse: document.getElementById('set-adresse').value.trim(),
+    telephone: document.getElementById('set-tel').value.trim(),
+    ouverture: document.getElementById('set-ouverture').value || '09:00',
+    fermeture: document.getElementById('set-fermeture').value || '20:00',
+    dureeSlot: Number(document.getElementById('set-duree').value) || 30,
+    joursFermeture,
+    aboutTitle: document.getElementById('set-about-title').value.trim(),
+    aboutText: document.getElementById('set-about-text').value.trim(),
+    footerText: document.getElementById('set-footer').value.trim()
+  };
+  const btn = event.target.closest('button');
+  const old = btn.innerHTML;
+  const result = await apiPost('saveParametres', { data: payload });
+  btn.innerHTML = '<i class="fa-solid fa-check"></i> Enregistré';
+  setTimeout(() => btn.innerHTML = old, 1500);
+  if (result) syncAndRender();
+};
+
+renderBookingStep();
+</script>
+
+</body>
+</html>
