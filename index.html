@@ -720,23 +720,8 @@ function renderClientGalerie(){
 }
 
 // ========== CLIENT : CALENDRIER CORRIGÉ ==========
-function getFirstAvailableDate() {
-  let cursor = new Date();
-  cursor.setHours(0, 0, 0, 0);
-  
-  let guard = 0;
-  while (guard < 60) {
-    const dayOfWeek = cursor.getDay();
-    const isClosed = (appData.settings.joursFermeture || []).includes(dayOfWeek);
-    if (!isClosed) {
-      return new Date(cursor);
-    }
-    cursor.setDate(cursor.getDate() + 1);
-    guard++;
-  }
-  return new Date();
-}
 
+// Fonction qui génère TOUJOURS des créneaux pour une date donnée
 function generateSlotsForDate(date) {
   const [oh, om] = (appData.settings.ouverture || '09:00').split(':').map(Number);
   const [fh, fm] = (appData.settings.fermeture || '20:00').split(':').map(Number);
@@ -745,13 +730,14 @@ function generateSlotsForDate(date) {
   const end = fh * 60 + fm;
   const step = Number(appData.settings.dureeSlot) || 30;
   
+  // Si la date est aujourd'hui, on ne montre que les créneaux futurs
   const today = new Date();
   const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
   const isToday = date === todayStr;
   const currentMinutes = today.getHours() * 60 + today.getMinutes();
   const minTime = isToday ? currentMinutes + 30 : 0;
 
-  // TOUJOURS générer des créneaux pour les jours ouverts
+  // Générer les créneaux
   while (t + step <= end) {
     if (t > minTime) {
       const h = String(Math.floor(t/60)).padStart(2,'0');
@@ -763,6 +749,7 @@ function generateSlotsForDate(date) {
   return slots;
 }
 
+// Récupère les créneaux déjà pris pour une date
 function getTakenSlotsForDate(date) {
   const taken = [];
   const coiffeurId = booking.coiffeurId || null;
@@ -782,11 +769,36 @@ function getTakenSlotsForDate(date) {
   return taken;
 }
 
+// Récupère les créneaux disponibles
 function getAvailableSlotsForDate(date) {
   const slots = generateSlotsForDate(date);
   const taken = getTakenSlotsForDate(date);
-  // Filtrer les créneaux pris
   return slots.filter(slot => !taken.includes(slot));
+}
+
+// Trouve la première date disponible
+function getFirstAvailableDate() {
+  let cursor = new Date();
+  cursor.setHours(0, 0, 0, 0);
+  
+  let guard = 0;
+  while (guard < 60) {
+    const dayOfWeek = cursor.getDay();
+    const isClosed = (appData.settings.joursFermeture || []).includes(dayOfWeek);
+    if (!isClosed) {
+      const dateStr = `${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,'0')}-${String(cursor.getDate()).padStart(2,'0')}`;
+      const slots = getAvailableSlotsForDate(dateStr);
+      if (slots.length > 0) {
+        return new Date(cursor);
+      }
+    }
+    cursor.setDate(cursor.getDate() + 1);
+    guard++;
+  }
+  // Fallback: retourner aujourd'hui + 1 jour
+  const fallback = new Date();
+  fallback.setDate(fallback.getDate() + 1);
+  return fallback;
 }
 
 function renderCalendar() {
@@ -985,6 +997,7 @@ function renderBookingStep(){
   renderStepper();
   
   if (booking.step === 3) {
+    // Trouver une date disponible si aucune n'est sélectionnée
     if (!booking.date) {
       const d = getFirstAvailableDate();
       const year = d.getFullYear();
@@ -1323,6 +1336,16 @@ renderCoiffeursAdmin();
 renderGalerieAdmin();
 fillSettingsForm();
 document.getElementById('loader').classList.add('masque');
+
+// Forcer l'initialisation du booking avec une date valide
+const firstDate = getFirstAvailableDate();
+const year = firstDate.getFullYear();
+const month = String(firstDate.getMonth() + 1).padStart(2, '0');
+const day = String(firstDate.getDate()).padStart(2, '0');
+booking.date = `${year}-${month}-${day}`;
+currentMonth = firstDate.getMonth();
+currentYear = firstDate.getFullYear();
+
 renderBookingStep();
 </script>
 
