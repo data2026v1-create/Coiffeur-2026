@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>BARBER PRO DZ — Business Suite</title>
+<title>Rachid MGH — Barber Pro DZ</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -99,13 +99,13 @@ header{height:70px;border-bottom:1px solid var(--border);display:flex;align-item
 .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 24px; }
 .calendar-day-name { text-align: center; font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 8px; letter-spacing: 1px; }
 .calendar-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.95rem; cursor: pointer; transition: 0.15s; }
-.calendar-day:hover:not(.disabled):not(.empty) { border-color: var(--gold); }
+.calendar-day:hover:not(.disabled):not(.empty) { border-color: var(--gold); background: var(--gold-dim); }
 .calendar-day.selected { background: var(--gold); border-color: var(--gold); color: #000; font-weight: 700; }
 .calendar-day.disabled { opacity: 0.2; cursor: not-allowed; background: transparent; text-decoration: line-through; }
 .calendar-day.empty { background: transparent; border-color: transparent; cursor: default; }
 .time-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px;margin-top:10px;}
 .time-chip{font-family:var(--font-mono);background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;text-align:center;cursor:pointer;font-size:.85rem;transition:.15s;}
-.time-chip:hover:not(.taken){border-color:var(--gold);}
+.time-chip:hover:not(.taken){border-color:var(--gold);background:var(--gold-dim);}
 .time-chip.selected{background:var(--gold);color:#000;border-color:var(--gold);font-weight:700;}
 .time-chip.taken{opacity:.3;text-decoration:line-through;cursor:not-allowed;}
 
@@ -185,7 +185,7 @@ td{padding:14px 16px;border-top:1px solid var(--border);vertical-align:middle;}
 
 <header>
   <div class="conteneur nav-content">
-    <a href="#" class="logo"><i class="fa-solid fa-scissors"></i><span id="brand-name">BARBER PRO DZ</span></a>
+    <a href="#" class="logo"><i class="fa-solid fa-scissors"></i><span id="brand-name">RACHID MGH</span></a>
     <nav class="nav-menu">
       <div class="nav-link active" id="tab-client" onclick="switchMode('client')"><i class="fa-solid fa-calendar-check"></i><span class="lbl">Réserver</span></div>
       <div class="nav-link" id="tab-admin" onclick="switchMode('admin')"><i class="fa-solid fa-lock"></i><span class="lbl">Admin</span></div>
@@ -252,12 +252,12 @@ td{padding:14px 16px;border-top:1px solid var(--border);vertical-align:middle;}
   </div>
 
   <div class="about-section">
-    <h2 id="about-title">À propos</h2>
-    <p id="about-text">Texte à propos...</p>
+    <h2 id="about-title">À propos de notre salon</h2>
+    <p id="about-text">Bienvenue chez Rachid MGH Pro DZ, votre salon de coiffure de référence.</p>
   </div>
   
   <div class="site-footer" id="site-footer">
-    © 2026 Barber Pro DZ
+    © 2026 Rachid MGH. Tous droits réservés.
   </div>
 </main>
 
@@ -392,14 +392,15 @@ td{padding:14px 16px;border-top:1px solid var(--border);vertical-align:middle;}
 
 <script>
 // ============================================================
-// BARBER PRO DZ — Application 100% Opérationnelle
+// RACHID MGH — Application 100% Opérationnelle
+// Contact: 0770938972
 // ============================================================
 
 // ⚠️ REMPLACEZ CETTE URL PAR LA VÔTRE APRÈS DÉPLOIEMENT
 const API_URL = 'https://script.google.com/macros/s/AKfycbzB8vhbCqQaB40qV50eNSwU04HucuMnm8GsIN1vHhbaX-DEOT8SbhDN6Z_AJzosmqkR/exec';
 const POLL_MS = 5000;
 
-// ========== DONNÉES DE DÉMONSTRATION (si Sheets non accessible) ==========
+// ========== DONNÉES DE DÉMONSTRATION ==========
 const DEMO_DATA = {
   services: [
     ['SVC-1', { nom: 'Coupe Homme', tarif: 1500, duree: 30 }],
@@ -409,28 +410,41 @@ const DEMO_DATA = {
     ['SVC-5', { nom: 'Soin Capillaire', tarif: 1800, duree: 40 }]
   ],
   coiffeurs: [
-    ['COIF-1', { nom: 'Karim', specialite: 'Dégradé Expert', image: '' }],
-    ['COIF-2', { nom: 'Sofiane', specialite: 'Barbe & Style', image: '' }],
-    ['COIF-3', { nom: 'Rachid', specialite: 'Coiffure Classique', image: '' }]
+    ['COIF-1', { nom: 'Rachid', specialite: 'Dégradé Expert', image: '' }],
+    ['COIF-2', { nom: 'Karim', specialite: 'Barbe & Style', image: '' }],
+    ['COIF-3', { nom: 'Sofiane', specialite: 'Coiffure Classique', image: '' }]
   ],
   galerie: [],
   reservations: [],
   settings: {
-    nomSalon: 'Barber Pro DZ',
+    nomSalon: 'Rachid MGH',
     devise: 'DA',
-    adresse: '123 Rue des Coiffeurs, Alger',
-    telephone: '0555 12 34 56',
+    adresse: 'Alger, Algérie',
+    telephone: '0770938972',
     ouverture: '09:00',
     fermeture: '20:00',
     dureeSlot: 30,
-    joursFermeture: [0],
+    joursFermeture: [],
     aboutTitle: 'À propos de notre salon',
-    aboutText: 'Bienvenue chez Barber Pro DZ, votre salon de coiffure de référence. Nous vous offrons des prestations de qualité dans une ambiance conviviale.',
-    footerText: '© 2026 Barber Pro DZ. Tous droits réservés.'
+    aboutText: 'Bienvenue chez Rachid MGH Pro DZ, votre salon de coiffure de référence.',
+    footerText: '© 2026 Rachid MGH. Tous droits réservés.'
   }
 };
 
-const DEFAULT_SETTINGS = { nomSalon: 'Barber Pro DZ', adresse: '', telephone: '', devise: 'DA', ouverture: '09:00', fermeture: '20:00', dureeSlot: 30, joursFermeture: [], aboutTitle: 'À propos de notre salon', aboutText: 'Bienvenue chez Barber Pro DZ, votre salon de coiffure de référence.', footerText: '© 2026 Barber Pro DZ. Tous droits réservés.' };
+const DEFAULT_SETTINGS = { 
+  nomSalon: 'Rachid MGH', 
+  adresse: 'Alger, Algérie', 
+  telephone: '0770938972', 
+  devise: 'DA', 
+  ouverture: '09:00', 
+  fermeture: '20:00', 
+  dureeSlot: 30, 
+  joursFermeture: [], 
+  aboutTitle: 'À propos de notre salon', 
+  aboutText: 'Bienvenue chez Rachid MGH Pro DZ, votre salon de coiffure de référence.', 
+  footerText: '© 2026 Rachid MGH. Tous droits réservés.' 
+};
+
 const JOURS = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
 const STATUT_FR_TO_CODE = { 'en attente':'attente', 'confirmé':'confirme', 'confirme':'confirme', 'annulé':'annule', 'annule':'annule' };
 const STATUT_CODE_TO_FR = { attente:'En attente', confirme:'Confirmé', annule:'Annulé' };
@@ -469,14 +483,12 @@ async function apiPost(action, payload){
     return await res.json();
   } catch (err) {
     console.warn('API POST échoué, simulation locale');
-    // Simulation locale pour la démonstration
     return { success: true };
   }
 }
 
 function normalizeData(raw){
   if (!raw || typeof raw !== 'object') {
-    // Utiliser les données de démonstration
     return { ...DEMO_DATA };
   }
   
@@ -713,7 +725,7 @@ function renderClientGalerie(){
   }
 }
 
-// ========== CLIENT : CALENDRIER ==========
+// ========== CLIENT : CALENDRIER CORRIGÉ ==========
 function getFirstAvailableDate() {
   let cursor = new Date();
   cursor.setHours(0, 0, 0, 0);
@@ -722,7 +734,12 @@ function getFirstAvailableDate() {
   while (guard < 60) {
     const dayOfWeek = cursor.getDay();
     const isClosed = (appData.settings.joursFermeture || []).includes(dayOfWeek);
-    if (!isClosed) return new Date(cursor);
+    if (!isClosed) {
+      // Vérifier qu'il y a des créneaux pour ce jour
+      const dateStr = `${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,'0')}-${String(cursor.getDate()).padStart(2,'0')}`;
+      const slots = getAvailableSlotsForDate(dateStr);
+      if (slots.length > 0) return new Date(cursor);
+    }
     cursor.setDate(cursor.getDate() + 1);
     guard++;
   }
@@ -768,6 +785,7 @@ function generateSlotsForDate(date) {
   const currentMinutes = today.getHours() * 60 + today.getMinutes();
   const minTime = isToday ? currentMinutes + 30 : 0;
 
+  // Générer des créneaux de 9h à 20h
   while (t + step <= end) {
     if (t > minTime) {
       const h = String(Math.floor(t/60)).padStart(2,'0');
@@ -819,11 +837,22 @@ function renderCalendar() {
     
     let disabled = false;
     
-    if (d < today) disabled = true;
-    if ((appData.settings.joursFermeture || []).includes(d.getDay())) disabled = true;
+    // Date passée
+    if (d < today) {
+      disabled = true;
+    }
+    
+    // Jour de fermeture
+    if ((appData.settings.joursFermeture || []).includes(d.getDay())) {
+      disabled = true;
+    }
+    
+    // Vérifier s'il y a des créneaux disponibles
     if (!disabled) {
       const availableSlots = getAvailableSlotsForDate(iso);
-      if (availableSlots.length === 0) disabled = true;
+      if (availableSlots.length === 0) {
+        disabled = true;
+      }
     }
 
     const sel = booking.date === iso ? 'selected' : '';
@@ -1269,7 +1298,7 @@ function fillSettingsForm(){
 window.saveSettings = async () => {
   const joursFermeture = [...document.querySelectorAll('#set-jours .form-check-pill.checked')].map(el => Number(el.dataset.day));
   const payload = {
-    nomSalon: document.getElementById('set-nom').value.trim() || 'Barber Pro DZ',
+    nomSalon: document.getElementById('set-nom').value.trim() || 'Rachid MGH',
     devise: document.getElementById('set-devise').value.trim() || 'DA',
     adresse: document.getElementById('set-adresse').value.trim(),
     telephone: document.getElementById('set-tel').value.trim(),
