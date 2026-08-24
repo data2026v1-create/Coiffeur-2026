@@ -63,7 +63,7 @@ header{height:70px;border-bottom:1px solid var(--border);display:flex;align-item
 .kpi-label{color:var(--text-muted);font-size:.72rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;}
 .kpi-sub{font-size:.78rem;color:var(--text-muted);font-family:var(--font-mono);}
 
-/* ===== SERVICE CARDS (ticket look) ===== */
+/* ===== SERVICE CARDS ===== */
 .service-card{background:var(--card);border:1px solid var(--border);padding:18px;border-radius:var(--radius-sm);cursor:pointer;transition:.15s;position:relative;}
 .service-card:hover{border-color:var(--gold);}
 .service-card.selected{border-color:var(--gold);background:var(--gold-dim);box-shadow:0 0 0 1px var(--gold) inset;}
@@ -74,14 +74,14 @@ header{height:70px;border-bottom:1px solid var(--border);display:flex;align-item
 .service-price{font-family:var(--font-mono);color:var(--gold);font-weight:700;font-size:1.05rem;}
 .service-duree{color:var(--text-muted);font-size:.78rem;}
 
-/* barber card */
+/* ===== BARBER CARD ===== */
 .barber-card{background:var(--card);border:1px solid var(--border);padding:20px;border-radius:var(--radius-sm);cursor:pointer;text-align:center;transition:.15s;}
 .barber-card:hover{border-color:var(--gold);}
 .barber-card.selected{border-color:var(--gold);background:var(--gold-dim);}
 .barber-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-light));display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-family:var(--font-display);font-weight:700;color:#000;font-size:1.3rem;overflow:hidden;}
 .barber-avatar img{width:100%;height:100%;object-fit:cover;}
 
-/* gallery */
+/* ===== GALLERY ===== */
 .gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin:30px 0;}
 .gallery-item{aspect-ratio:1;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);position:relative;background:var(--bg-elev);}
 .gallery-item img{width:100%;height:100%;object-fit:cover;transition:transform .3s;}
@@ -91,7 +91,6 @@ header{height:70px;border-bottom:1px solid var(--border);display:flex;align-item
 .about-section h2{font-family:var(--font-display);font-size:1.8rem;margin-bottom:14px;color:var(--gold-light);}
 .about-section p{color:var(--text-muted);line-height:1.6;max-width:600px;margin:0 auto;}
 .site-footer{text-align:center;padding:20px 0 40px;color:var(--text-dim);font-size:.8rem;}
-
 
 /* ===== STEPPER ===== */
 .stepper{display:flex;justify-content:center;gap:6px;margin-bottom:36px;flex-wrap:wrap;}
@@ -111,17 +110,18 @@ header{height:70px;border-bottom:1px solid var(--border);display:flex;align-item
 .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 24px; }
 .calendar-day-name { text-align: center; font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 8px; letter-spacing: 1px; }
 .calendar-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.95rem; cursor: pointer; transition: 0.15s; }
-.calendar-day:hover:not(.disabled) { border-color: var(--gold); }
+.calendar-day:hover:not(.disabled):not(.empty) { border-color: var(--gold); }
 .calendar-day.selected { background: var(--gold); border-color: var(--gold); color: #000; font-weight: 700; }
 .calendar-day.disabled { opacity: 0.25; cursor: not-allowed; background: transparent; text-decoration: line-through; }
 .calendar-day.empty { background: transparent; border-color: transparent; cursor: default; }
 .time-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px;}
 .time-chip{font-family:var(--font-mono);background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;text-align:center;cursor:pointer;font-size:.85rem;transition:.15s;}
-.time-chip:hover{border-color:var(--gold);}
+.time-chip:hover:not(.taken){border-color:var(--gold);}
 .time-chip.selected{background:var(--gold);color:#000;border-color:var(--gold);font-weight:700;}
-.time-chip.taken{opacity:.3;text-decoration:line-through;cursor:not-allowed;}
+.time-chip.taken{opacity:.4;text-decoration:line-through;cursor:not-allowed;}
+.time-chip .lock-icon{font-size:.65rem;margin-left:3px;}
 
-/* ===== CART / TICKET BAR ===== */
+/* ===== TICKET BAR ===== */
 .ticket-bar{position:fixed;bottom:0;left:0;right:0;background:var(--bg-elev);border-top:1px dashed var(--border);z-index:900;transform:translateY(100%);transition:transform .3s ease;box-shadow:0 -10px 30px rgba(0,0,0,.4);}
 .ticket-bar.show{transform:translateY(0);}
 .ticket-bar::before,.ticket-bar::after{content:'';position:absolute;top:-9px;width:18px;height:18px;border-radius:50%;background:var(--bg);}
@@ -423,12 +423,9 @@ td{padding:14px 16px;border-top:1px solid var(--border);vertical-align:middle;}
 /* ==========================================================
    BARBER PRO DZ — connecté à Google Sheets via Apps Script
    
-   ⚠️ ATTENTION : POUR CONNECTER VOTRE PROPRE GOOGLE SHEETS :
-   1. Déployez le code Apps Script en tant qu'Application Web
-   2. Copiez l'URL générée
-   3. Remplacez l'URL ci-dessous par VOTRE URL (en gardant les guillemets)
+   ⚠️ ATTENTION : REMPLACEZ L'URL CI-DESSOUS PAR LA VOTRE
    ========================================================== */
-const API_URL = 'https://script.google.com/macros/s/AKfycbzB8vhbCqQaB40qV50eNSwU04HucuMnm8GsIN1vHhbaX-DEOT8SbhDN6Z_AJzosmqkR/exec'; // REMPLACEZ CETTE LIGNE
+const API_URL = 'https://script.google.com/macros/s/AKfycbzB8vhbCqQaB40qV50eNSwU04HucuMnm8GsIN1vHhbaX-DEOT8SbhDN6Z_AJzosmqkR/exec';
 const POLL_MS = 5000;
 
 const DEFAULT_SETTINGS = { nomSalon: 'Barber Pro DZ', adresse: '', telephone: '', devise: 'DA', ouverture: '09:00', fermeture: '20:00', dureeSlot: 30, joursFermeture: [], aboutTitle: 'À propos de notre salon', aboutText: 'Bienvenue chez Barber Pro DZ, votre salon de coiffure de référence.', footerText: '© 2026 Barber Pro DZ. Tous droits réservés.' };
@@ -440,6 +437,8 @@ let appData = { services: [], coiffeurs: [], reservations: [], galerie: [], sett
 let firstSync = true;
 
 let booking = { step: 1, services: [], coiffeurId: null, coiffeurNom: null, date: null, heure: null, nom: '', tel: '' };
+let currentMonth = new Date().getMonth();
+let currentYear = new Date().getFullYear();
 
 // ---------- APPEL API ----------
 async function apiGet(){
@@ -488,7 +487,6 @@ function formatTimeSetting(val, defaultVal) {
   return defaultVal;
 }
 
-// ---------- UTILITAIRES ----------
 function formatImageUrl(url) {
   if (!url) return '';
   const str = String(url).trim();
@@ -634,7 +632,7 @@ window.switchAdminTab = (tab) => {
   document.querySelector(`.admin-tab[data-tab="${tab}"]`).classList.add('active');
 };
 
-// ================= MODAL GENERIQUE =================
+// ================= MODAL =================
 function openModal(title, bodyHtml, footHtml){
   const root = document.getElementById('modal-root');
   root.innerHTML = `<div class="modal-box">
@@ -734,23 +732,17 @@ function renderClientGalerie(){
   }
 }
 
-// ================= CLIENT : DATE & HEURE (STEP 3) =================
-let currentMonth = new Date().getMonth();
-let currentYear = new Date().getFullYear();
-
+// ================= CLIENT : DATE & HEURE (STEP 3) - CORRIGÉ =================
 function getFirstAvailableDate() {
   let cursor = new Date();
-  const [fh, fm] = (appData.settings.fermeture || '20:00').split(':').map(Number);
-  const closingTime = fh * 60 + fm;
-  const nowTime = cursor.getHours() * 60 + cursor.getMinutes();
+  cursor.setHours(0, 0, 0, 0);
   
-  if (nowTime >= closingTime) {
-      cursor.setDate(cursor.getDate() + 1);
-  }
-
   let guard = 0;
-  while (guard < 60){
-    if (!(appData.settings.joursFermeture||[]).includes(cursor.getDay())){
+  while (guard < 60) {
+    const dayOfWeek = cursor.getDay();
+    const isClosed = (appData.settings.joursFermeture || []).includes(dayOfWeek);
+    
+    if (!isClosed) {
       return new Date(cursor);
     }
     cursor.setDate(cursor.getDate() + 1);
@@ -759,7 +751,72 @@ function getFirstAvailableDate() {
   return new Date();
 }
 
-function renderCalendar(){
+function getAvailableSlotsForDate(date) {
+  const slots = generateSlotsForDate(date);
+  const taken = getTakenSlotsForDate(date);
+  return slots.filter(slot => !taken.includes(slot));
+}
+
+function getTakenSlotsForDate(date) {
+  const taken = [];
+  const coiffeurId = booking.coiffeurId || null;
+  
+  appData.reservations.forEach(([key, r]) => {
+    // Ne pas prendre en compte les réservations annulées
+    if (r.statut === 'annule') return;
+    
+    // Même date
+    if (r.date === date) {
+      // Si un coiffeur est sélectionné, vérifier les conflits
+      if (coiffeurId && coiffeurId !== 'any') {
+        if (r.coiffeurNom === booking.coiffeurNom) {
+          if (r.heure) taken.push(r.heure);
+        }
+      } else {
+        // Si "Sans préférence", prendre tous les créneaux occupés
+        if (r.heure) taken.push(r.heure);
+      }
+    }
+  });
+  
+  return taken;
+}
+
+function generateSlotsForDate(date) {
+  const [oh, om] = (appData.settings.ouverture || '09:00').split(':').map(Number);
+  const [fh, fm] = (appData.settings.fermeture || '20:00').split(':').map(Number);
+  const slots = [];
+  let t = oh * 60 + om;
+  const end = fh * 60 + fm;
+  const step = Number(appData.settings.dureeSlot) || 30;
+  
+  // Vérifier si c'est aujourd'hui
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  const isToday = date === todayStr;
+  const currentMinutes = today.getHours() * 60 + today.getMinutes();
+  
+  // Ajouter un délai minimum de 30 minutes pour les réservations du jour
+  const minTime = isToday ? currentMinutes + 30 : 0;
+
+  while (t + step <= end) {
+    if (t > minTime) {
+      const h = String(Math.floor(t/60)).padStart(2,'0');
+      const m = String(t%60).padStart(2,'0');
+      slots.push(`${h}:${m}`);
+    }
+    t += step;
+  }
+  
+  return slots;
+}
+
+function generateSlots() {
+  if (!booking.date) return [];
+  return generateSlotsForDate(booking.date);
+}
+
+function renderCalendar() {
   const wrap = document.getElementById('calendar-wrapper');
   if (!wrap) return;
 
@@ -770,7 +827,7 @@ function renderCalendar(){
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
   
   const today = new Date();
-  today.setHours(0,0,0,0);
+  today.setHours(0, 0, 0, 0);
   
   const isCurrentMonth = currentYear === today.getFullYear() && currentMonth === today.getMonth();
 
@@ -798,20 +855,23 @@ function renderCalendar(){
     const iso = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     
     let disabled = false;
+    
+    // Date passée
     if (d < today) {
       disabled = true;
     }
-    if (d.getTime() === today.getTime()) {
-      const [fh, fm] = (appData.settings.fermeture || '20:00').split(':').map(Number);
-      const closingTime = fh * 60 + fm;
-      const nowTime = new Date().getHours() * 60 + new Date().getMinutes();
-      if (nowTime >= closingTime) {
-        disabled = true;
-      }
+    
+    // Jour de fermeture
+    if ((appData.settings.joursFermeture || []).includes(d.getDay())) {
+      disabled = true;
     }
     
-    if ((appData.settings.joursFermeture||[]).includes(d.getDay())) {
-      disabled = true;
+    // Vérifier s'il reste des créneaux disponibles pour cette date
+    if (!disabled) {
+      const availableSlots = getAvailableSlotsForDate(iso);
+      if (availableSlots.length === 0) {
+        disabled = true;
+      }
     }
 
     const sel = booking.date === iso ? 'selected' : '';
@@ -824,6 +884,37 @@ function renderCalendar(){
   html += `</div>`;
   wrap.innerHTML = html;
   renderTimeGrid();
+}
+
+function renderTimeGrid() {
+  const grid = document.getElementById('time-grid');
+  if (!grid) return;
+  
+  if (!booking.date) {
+    grid.innerHTML = `<div class="section-sub">Choisissez une date pour voir les créneaux</div>`;
+    return;
+  }
+  
+  const availableSlots = getAvailableSlotsForDate(booking.date);
+  
+  if (availableSlots.length === 0) {
+    grid.innerHTML = `<div class="section-sub" style="color:var(--warning); text-align:center; padding: 20px;">
+      <i class="fa-solid fa-clock" style="font-size:1.5rem; display:block; margin-bottom:10px;"></i>
+      Aucun créneau disponible pour cette date.<br>
+      <small style="color:var(--text-dim);">Essayez une autre date ou un autre coiffeur.</small>
+    </div>`;
+    return;
+  }
+  
+  const taken = getTakenSlotsForDate(booking.date);
+  
+  grid.innerHTML = availableSlots.map(s => {
+    const isTaken = taken.includes(s);
+    const sel = booking.heure === s ? 'selected' : '';
+    return `<div class="time-chip ${sel} ${isTaken ? 'taken' : ''}" onclick="${isTaken ? '' : `selectHeure('${s}')`}">
+      ${s} ${isTaken ? '<span class="lock-icon">🔒</span>' : ''}
+    </div>`;
+  }).join('');
 }
 
 window.prevMonth = () => {
@@ -844,61 +935,22 @@ window.nextMonth = () => {
   renderCalendar();
 };
 
-window.selectDate = (iso) => { booking.date = iso; booking.heure = null; renderCalendar(); updateTicketBar(); };
+window.selectDate = (iso) => {
+  booking.date = iso;
+  booking.heure = null;
+  renderCalendar();
+  updateTicketBar();
+};
 
-function generateSlots(){
-  const [oh, om] = (appData.settings.ouverture || '09:00').split(':').map(Number);
-  const [fh, fm] = (appData.settings.fermeture || '20:00').split(':').map(Number);
-  const slots = [];
-  let t = oh*60+om;
-  const end = fh*60+fm;
-  const step = Number(appData.settings.dureeSlot) || 30;
-  
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  const isoToday = `${year}-${month}-${day}`;
-  
-  const isToday = booking.date === isoToday;
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
-
-  while (t + step <= end){
-    if (!isToday || t > currentMinutes) {
-      const h = String(Math.floor(t/60)).padStart(2,'0');
-      const m = String(t%60).padStart(2,'0');
-      slots.push(`${h}:${m}`);
+window.selectHeure = (h) => {
+  booking.heure = h;
+  renderTimeGrid();
+  updateTicketBar();
+  setTimeout(() => {
+    if (stepIsValid(booking.step)) {
+      window.nextStep();
     }
-    t += step;
-  }
-  return slots;
-}
-
-function renderTimeGrid(){
-  const grid = document.getElementById('time-grid');
-  if (!booking.date){ grid.innerHTML = `<div class="section-sub">Choisissez une date pour voir les créneaux</div>`; return; }
-  const slots = generateSlots();
-  if (slots.length === 0) {
-    grid.innerHTML = `<div class="section-sub" style="color:var(--warning); text-align:center; padding: 20px;">Aucun créneau disponible pour cette date.</div>`;
-    return;
-  }
-  const taken = new Set(
-    appData.reservations
-      .filter(([k,r]) => r.date === booking.date && r.statut !== 'annule')
-      .map(([k,r]) => r.heure)
-  );
-  grid.innerHTML = slots.map(s => {
-    const isTaken = taken.has(s);
-    const sel = booking.heure === s ? 'selected' : '';
-    return `<div class="time-chip ${sel} ${isTaken?'taken':''}" onclick="${isTaken?'':`selectHeure('${s}')`}">${s}</div>`;
-  }).join('');
-}
-
-window.selectHeure = (h) => { 
-  booking.heure = h; 
-  renderTimeGrid(); 
-  updateTicketBar(); 
-  setTimeout(() => { if (stepIsValid(booking.step)) window.nextStep(); }, 350);
+  }, 400);
 };
 
 // ================= CLIENT : STEP 4 =================
@@ -947,19 +999,29 @@ function stepIsValid(step){
   switch(step){
     case 1: return booking.services.length > 0;
     case 2: return !!booking.coiffeurId;
-    case 3: return !!booking.date && !!booking.heure;
+    case 3: {
+      if (!booking.date || !booking.heure) return false;
+      const availableSlots = getAvailableSlotsForDate(booking.date);
+      if (!availableSlots.includes(booking.heure)) {
+        booking.heure = null;
+        renderTimeGrid();
+        return false;
+      }
+      return true;
+    }
     case 4: return booking.nom.length > 1 && booking.tel.length > 6;
     default: return true;
   }
 }
 
 function renderBookingStep(){
-  for (let i=1;i<=5;i++){
+  for (let i = 1; i <= 5; i++){
     const stepEl = document.getElementById(`c-step-${i}`);
     if (stepEl) stepEl.classList.toggle('masque', booking.step !== i);
   }
   document.getElementById('c-step-success').classList.add('masque');
   renderStepper();
+  
   if (booking.step === 3) {
     if (!booking.date) {
       const d = getFirstAvailableDate();
@@ -973,6 +1035,7 @@ function renderBookingStep(){
     }
     renderCalendar();
   }
+  
   if (booking.step === 5) renderConfirmRecap();
   updateTicketBar();
 }
@@ -1027,254 +1090,4 @@ async function submitReservation(){
 }
 
 window.resetBooking = () => {
-  booking = { step: 1, services: [], coiffeurId: null, coiffeurNom: null, date: null, heure: null, nom: '', tel: '' };
-  document.getElementById('input-nom').value = '';
-  document.getElementById('input-tel').value = '';
-  renderClientServices();
-  renderClientCoiffeurs();
-  renderBookingStep();
-};
-
-// ================= ADMIN : DASHBOARD =================
-let myChart;
-function renderDashboard(){
-  let totalCA = 0, countAttente = 0;
-  const serviceStats = {};
-  appData.reservations.forEach(([k,r]) => {
-    if (r.statut !== 'annule') totalCA += Number(r.total || 0);
-    if (r.statut === 'attente') countAttente++;
-    (r.prestations||[]).forEach(p => { serviceStats[p.nom] = (serviceStats[p.nom]||0)+1; });
-  });
-  document.getElementById('kpi-ca').textContent = money(totalCA);
-  document.getElementById('kpi-total').textContent = appData.reservations.length;
-  document.getElementById('kpi-attente').textContent = `${countAttente} en attente`;
-  const top = Object.entries(serviceStats).sort((a,b)=>b[1]-a[1])[0];
-  document.getElementById('kpi-top').textContent = top ? top[0] : 'Aucun';
-  document.getElementById('kpi-coiffeurs').textContent = appData.coiffeurs.length;
-
-  const recent = [...appData.reservations].sort((a,b)=> (b[1].creeLe||0)-(a[1].creeLe||0)).slice(0,6);
-  const tbody = document.getElementById('dash-table-body');
-  tbody.innerHTML = recent.length ? recent.map(([k,r]) => rowHtml(r,false)).join('') :
-    `<tr><td colspan="5" class="empty-row">Aucune réservation pour le moment</td></tr>`;
-
-  const dataMap = {};
-  appData.reservations.forEach(([k,r]) => { dataMap[r.date] = (dataMap[r.date]||0)+1; });
-  const labels = Object.keys(dataMap).sort();
-  const values = labels.map(l => dataMap[l]);
-  const ctx = document.getElementById('chartActivity').getContext('2d');
-  if (myChart) myChart.destroy();
-  myChart = new Chart(ctx, {
-    type:'line',
-    data:{ labels, datasets:[{ label:'Rendez-vous', data: values, borderColor:'#c9a227', tension:.4, fill:true, backgroundColor:'rgba(201,162,39,.12)' }] },
-    options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true, grid:{color:'#2a2a30'}, ticks:{color:'#8c8c94'}}, x:{grid:{color:'#2a2a30'}, ticks:{color:'#8c8c94'}} } }
-  });
-}
-
-function rowHtml(r, withActions, key){
-  return `<tr>
-    <td><div style="font-weight:600;">${r.clientNom}</div><div style="font-size:.75rem;color:var(--text-muted);">${r.clientTel}</div></td>
-    <td>${(r.prestations||[]).map(p=>p.nom).join(', ')||'N/A'}</td>
-    ${withActions ? `<td>${r.coiffeurNom||'—'}</td>` : ''}
-    <td><div>${new Date(r.date).toLocaleDateString('fr-FR')}</div><div style="color:var(--gold);font-weight:700;font-family:var(--font-mono);">${r.heure}</div></td>
-    <td style="font-family:var(--font-mono);">${money(r.total)}</td>
-    <td><span class="status status-${r.statut||'confirme'}">${r.statut||'confirmé'}</span></td>
-    ${withActions ? `<td><div style="display:flex;gap:5px;">
-        <button class="btn btn-outline btn-sm" title="Confirmer" onclick="window.updateStatus('${key}','confirme')"><i class="fa-solid fa-check"></i></button>
-        <button class="btn btn-outline btn-sm" title="Annuler" onclick="window.updateStatus('${key}','annule')"><i class="fa-solid fa-xmark"></i></button>
-        <button class="btn btn-danger btn-sm" title="Supprimer" onclick="window.deleteResa('${key}')"><i class="fa-solid fa-trash"></i></button>
-      </div></td>` : ''}
-  </tr>`;
-}
-
-function renderReservationsTable(){
-  const tbody = document.getElementById('admin-table-body');
-  if (!tbody) return;
-  const statutFilter = document.getElementById('filter-statut')?.value || '';
-  const search = (document.getElementById('filter-search')?.value || '').toLowerCase();
-  let rows = appData.reservations.filter(([k,r]) => {
-    if (statutFilter && (r.statut||'confirme') !== statutFilter) return false;
-    if (search && !r.clientNom.toLowerCase().includes(search)) return false;
-    return true;
-  }).sort((a,b)=> (b[1].creeLe||0)-(a[1].creeLe||0));
-  tbody.innerHTML = rows.length ? rows.map(([k,r]) => rowHtml(r, true, k)).join('') :
-    `<tr><td colspan="7" class="empty-row">Aucune réservation trouvée</td></tr>`;
-}
-
-window.updateStatus = async (id, status) => { await apiPost('updateReservationStatus', { id, statut: STATUT_CODE_TO_FR[status] }); syncAndRender(); };
-window.deleteResa = async (id) => { if (confirm('Supprimer définitivement cette réservation ?')) { await apiPost('deleteReservation', { id }); syncAndRender(); } };
-
-window.exportData = () => {
-  const header = ['Client','Téléphone','Services','Coiffeur','Date','Heure','Total','Statut'];
-  const lines = appData.reservations.map(([k,r]) => [
-    r.clientNom, r.clientTel, (r.prestations||[]).map(p=>p.nom).join(' + '),
-    r.coiffeurNom||'', r.date, r.heure, r.total, r.statut||'confirme'
-  ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
-  const csv = [header.join(','), ...lines].join('\n');
-  const blob = new Blob(["\uFEFF"+csv], { type:'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `reservations_${Date.now()}.csv`; a.click();
-  URL.revokeObjectURL(url);
-};
-
-// ================= ADMIN : SERVICES CRUD =================
-function renderServicesAdmin(){
-  const el = document.getElementById('services-list');
-  el.innerHTML = appData.services.length ? appData.services.map(([key,s]) => `
-    <div class="list-card">
-      <div>
-        <div style="font-weight:600;">${s.nom}</div>
-        <div class="meta">${money(s.tarif)} · ${s.duree} min</div>
-      </div>
-      <div style="display:flex;gap:6px;">
-        <button class="btn btn-outline btn-sm" onclick='openServiceModal(${JSON.stringify(key)})'><i class="fa-solid fa-pen"></i></button>
-        <button class="btn btn-danger btn-sm" onclick="deleteService('${key}')"><i class="fa-solid fa-trash"></i></button>
-      </div>
-    </div>`).join('') : `<div class="section-sub">Aucun service. Ajoutez-en un pour commencer.</div>`;
-}
-window.openServiceModal = (key) => {
-  const existing = key ? appData.services.find(([k])=>k===key)?.[1] : null;
-  openModal(existing ? 'Modifier le service' : 'Nouveau service', `
-    <div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="svc-nom" value="${existing?.nom||''}"></div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Tarif (${appData.settings.devise})</label><input type="number" class="form-input" id="svc-tarif" value="${existing?.tarif||''}"></div>
-      <div class="form-group"><label class="form-label">Durée (min)</label><input type="number" class="form-input" id="svc-duree" value="${existing?.duree||''}"></div>
-    </div>`,
-    `<button class="btn btn-outline" onclick="closeModal()">Annuler</button>
-     <button class="btn btn-primary" onclick="saveService(${key?`'${key}'`:'null'})">Enregistrer</button>`);
-};
-window.saveService = async (key) => {
-  const nom = document.getElementById('svc-nom').value.trim();
-  const tarif = Number(document.getElementById('svc-tarif').value);
-  const duree = Number(document.getElementById('svc-duree').value);
-  if (!nom || !tarif || !duree) return;
-  await apiPost('saveService', { data: { id: key, nom, tarif, duree } });
-  closeModal();
-  syncAndRender();
-};
-window.deleteService = async (key) => { if (confirm('Supprimer ce service ?')) { await apiPost('deleteService', { id: key }); syncAndRender(); } };
-
-// ================= ADMIN : COIFFEURS CRUD =================
-function renderCoiffeursAdmin(){
-  const el = document.getElementById('coiffeurs-list');
-  el.innerHTML = appData.coiffeurs.length ? appData.coiffeurs.map(([key,c]) => {
-    const fallbackUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(c.nom||'Barber')}&background=c9a227&color=000`;
-    const avatarContent = c.image ? `<img src="${c.image}" style="width:100%;height:100%;object-fit:cover;" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${fallbackUrl}'">` : `<span style="font-weight:bold;font-size:1.1rem;color:#000;">${(c.nom||'?').charAt(0).toUpperCase()}</span>`;
-    return `
-    <div class="list-card" style="display:flex;align-items:center;gap:15px;">
-      <div style="width:45px;height:45px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-light));display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
-        ${avatarContent}
-      </div>
-      <div style="flex:1;">
-        <div style="font-weight:600;">${c.nom}</div>
-        <div class="meta">${c.specialite||'Barbier'}</div>
-      </div>
-      <div style="display:flex;gap:6px;">
-        <button class="btn btn-outline btn-sm" onclick='openCoiffeurModal(${JSON.stringify(key)})'><i class="fa-solid fa-pen"></i></button>
-        <button class="btn btn-danger btn-sm" onclick="deleteCoiffeur('${key}')"><i class="fa-solid fa-trash"></i></button>
-      </div>
-    </div>`;
-  }).join('') : `<div class="section-sub">Aucun coiffeur. Ajoutez-en un pour commencer.</div>`;
-}
-window.openCoiffeurModal = (key) => {
-  const existing = key ? appData.coiffeurs.find(([k])=>k===key)?.[1] : null;
-  openModal(existing ? 'Modifier le coiffeur' : 'Nouveau coiffeur', `
-    <div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="cof-nom" value="${existing?.nom||''}"></div>
-    <div class="form-group"><label class="form-label">Spécialité</label><input class="form-input" id="cof-spe" value="${existing?.specialite||''}" placeholder="Ex: Dégradé, Barbe..."></div>
-    <div class="form-group">
-      <label class="form-label">URL Image (Optionnel)</label>
-      <input class="form-input" id="cof-img" value="${existing?.image||''}" placeholder="https://...">
-      <div style="font-size:0.75rem; color:var(--text-muted); margin-top:6px;">
-        ⚠️ Pour Google Drive : assurez-vous que le lien est réglé sur <strong>"Tous les utilisateurs disposant du lien"</strong>.
-      </div>
-    </div>`,
-    `<button class="btn btn-outline" onclick="closeModal()">Annuler</button>
-     <button class="btn btn-primary" onclick="saveCoiffeur(${key?`'${key}'`:'null'})">Enregistrer</button>`);
-};
-window.saveCoiffeur = async (key) => {
-  const nom = document.getElementById('cof-nom').value.trim();
-  const specialite = document.getElementById('cof-spe').value.trim();
-  const image = formatImageUrl(document.getElementById('cof-img').value);
-  if (!nom) return;
-  await apiPost('saveCoiffeur', { data: { id: key, nom, specialite, image } });
-  closeModal();
-  syncAndRender();
-};
-window.deleteCoiffeur = async (key) => { if (confirm('Supprimer ce coiffeur ?')) { await apiPost('deleteCoiffeur', { id: key }); syncAndRender(); } };
-
-// ================= ADMIN : GALERIE CRUD =================
-function renderGalerieAdmin(){
-  const el = document.getElementById('galerie-list');
-  el.innerHTML = appData.galerie.length ? appData.galerie.map(([key,g]) => `
-    <div class="gallery-item" style="position:relative;">
-      <img src="${g.url}" alt="Galerie" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1599351431202-1e0f0137899a?q=80&w=400&auto=format&fit=crop'">
-      <button class="btn btn-danger btn-sm" style="position:absolute; top:8px; right:8px; padding:4px 8px;" onclick="deleteGalerie('${key}')"><i class="fa-solid fa-trash"></i></button>
-    </div>`).join('') : `<div class="section-sub">Aucune photo dans la galerie.</div>`;
-}
-window.openGalerieModal = () => {
-  openModal('Ajouter une photo', `
-    <div class="form-group">
-      <label class="form-label">URL de l'image (Google Drive ou Direct)</label>
-      <input class="form-input" id="gal-url" placeholder="https://...">
-      <div style="font-size:0.75rem; color:var(--text-muted); margin-top:6px;">
-        ⚠️ Pour Google Drive : assurez-vous que le lien est réglé sur <strong>"Tous les utilisateurs disposant du lien"</strong>.
-      </div>
-    </div>`,
-    `<button class="btn btn-outline" onclick="closeModal()">Annuler</button>
-     <button class="btn btn-primary" onclick="saveGalerie()">Enregistrer</button>`);
-};
-window.saveGalerie = async () => {
-  const url = formatImageUrl(document.getElementById('gal-url').value);
-  if (!url) return;
-  await apiPost('saveGalerie', { data: { url } });
-  closeModal();
-  syncAndRender();
-};
-window.deleteGalerie = async (key) => { if (confirm('Supprimer cette photo ?')) { await apiPost('deleteGalerie', { id: key }); syncAndRender(); } };
-
-// ================= ADMIN : PARAMETRES =================
-function fillSettingsForm(){
-  const s = appData.settings;
-  document.getElementById('set-nom').value = s.nomSalon;
-  document.getElementById('set-devise').value = s.devise;
-  document.getElementById('set-adresse').value = s.adresse;
-  document.getElementById('set-tel').value = s.telephone;
-  document.getElementById('set-ouverture').value = s.ouverture;
-  document.getElementById('set-fermeture').value = s.fermeture;
-  document.getElementById('set-duree').value = s.dureeSlot;
-  document.getElementById('set-about-title').value = s.aboutTitle || '';
-  document.getElementById('set-about-text').value = s.aboutText || '';
-  document.getElementById('set-footer').value = s.footerText || '';
-  document.getElementById('set-jours').innerHTML = JOURS.map((j,i) => {
-    const checked = (s.joursFermeture||[]).includes(i);
-    return `<div class="form-check-pill ${checked?'checked':''}" data-day="${i}" onclick="this.classList.toggle('checked')">${j}</div>`;
-  }).join('');
-}
-window.saveSettings = async () => {
-  const joursFermeture = [...document.querySelectorAll('#set-jours .form-check-pill.checked')].map(el => Number(el.dataset.day));
-  const payload = {
-    nomSalon: document.getElementById('set-nom').value.trim() || 'Barber Pro DZ',
-    devise: document.getElementById('set-devise').value.trim() || 'DA',
-    adresse: document.getElementById('set-adresse').value.trim(),
-    telephone: document.getElementById('set-tel').value.trim(),
-    ouverture: document.getElementById('set-ouverture').value || '09:00',
-    fermeture: document.getElementById('set-fermeture').value || '20:00',
-    dureeSlot: Number(document.getElementById('set-duree').value) || 30,
-    joursFermeture,
-    aboutTitle: document.getElementById('set-about-title').value.trim(),
-    aboutText: document.getElementById('set-about-text').value.trim(),
-    footerText: document.getElementById('set-footer').value.trim()
-  };
-  const btn = event.target.closest('button');
-  const old = btn.innerHTML;
-  await apiPost('saveParametres', { data: payload });
-  btn.innerHTML = '<i class="fa-solid fa-check"></i> Enregistré';
-  setTimeout(() => btn.innerHTML = old, 1500);
-  syncAndRender();
-};
-
-renderBookingStep();
-</script>
-
-</body>
-</html>
+  booking = { step: 1, services: [], coiffeurId: null, coiffeurNom
