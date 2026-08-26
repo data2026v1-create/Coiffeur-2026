@@ -536,7 +536,7 @@ document.getElementById('lang-btn').textContent = currentLang === 'fr' ? 'AR' : 
 applyTranslations();
 
 // --- APP DATA LOGIC ---
-const API_URL = 'https://script.google.com/macros/s/AKfycbwVJVa3ry_9zEoD-Of3RMEa2E8JXRFvOahwKuAFHiv_FyXVBkZAgAu3EGwuTiyd3TIb/exec'; 
+const API_URL = 'https://script.google.com/macros/s/AKfycby8nbg6Ui3k6l-SRkAtiZ3VgxYdPCt66ql9Kuy_ilHoV-KcGUAU9oUqXbma93DbMjiu/exec'; 
 const POLL_MS = 5000;
 
 const DEFAULT_SETTINGS = { nomSalon: 'Barber Pro DZ', adresse: '', telephone: '', devise: 'DA', ouverture: '09:00', fermeture: '20:00', dureeSlot: 30, joursFermeture: [], aboutTitle: 'À propos de notre salon', aboutText: 'Bienvenue chez Barber Pro DZ, votre salon de coiffure de référence.', footerText: '© 2026 Barber Pro DZ. Tous droits réservés.' };
@@ -550,7 +550,11 @@ let booking = { step: 1, services: [], coiffeurId: null, coiffeurNom: null, date
 async function apiGet(){ const res = await fetch(API_URL + (API_URL.includes('?') ? '&' : '?') + 't=' + new Date().getTime()); return res.json(); }
 async function apiPost(action, payload){
   const res = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action, ...payload }) });
-  return res.json();
+  const json = await res.json();
+  if (json && json.success === false) {
+    throw new Error(json.message || json.error || 'Une erreur est survenue côté serveur.');
+  }
+  return json;
 }
 
 function parseFrDate(str){
@@ -1002,7 +1006,11 @@ async function submitReservation(){
     document.getElementById('c-step-success').classList.remove('masque');
     document.getElementById('success-ref').textContent = t('successSub');
     updateTicketBar(); syncAndRender();
-  } catch(e) { alert("Error"); if (btn) btn.disabled = false; }
+  } catch(e) {
+    alert(e.message || "Une erreur est survenue, merci de réessayer.");
+    if (btn) btn.disabled = false;
+    syncAndRender(); // recharge les créneaux à jour (ex: en cas de conflit de réservation)
+  }
 }
 window.resetBooking = () => {
   booking = { step: 1, services: [], coiffeurId: null, coiffeurNom: null, date: null, heure: null, nom: '', tel: '' };
@@ -1067,8 +1075,8 @@ function renderReservationsTable(){
   tbody.innerHTML = rows.length ? rows.map(([k,r]) => rowHtml(r, true, k)).join('') : `<tr><td colspan="7" class="empty-row">Aucune réservation</td></tr>`;
 }
 
-window.updateStatus = async (id, status) => { await apiPost('updateStatut', { id, statut: STATUT_CODE_TO_FR[status] }); syncAndRender(); };
-window.deleteResa = async (id) => { if (confirm('Supprimer ?')) { await apiPost('deleteReservation', { id }); syncAndRender(); } };
+window.updateStatus = async (id, status) => { try { await apiPost('updateStatut', { id, statut: STATUT_CODE_TO_FR[status] }); syncAndRender(); } catch(e) { alert(e.message); } };
+window.deleteResa = async (id) => { if (confirm('Supprimer ?')) { try { await apiPost('deleteReservation', { id }); syncAndRender(); } catch(e) { alert(e.message); } } };
 window.exportData = () => {
   const header = ['Client','Tel','Services','Coiffeur','Date','Heure','Total','Statut'];
   const lines = appData.reservations.map(([k,r]) => [r.clientNom, r.clientTel, (r.prestations||[]).map(p=>p.nom).join(' + '), r.coiffeurNom||'', r.date, r.heure, r.total, r.statut||'confirme'].map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
@@ -1091,8 +1099,15 @@ window.openServiceModal = (key) => {
     <div class="form-group"><label class="form-label">Durée (min)</label><input type="number" class="form-input" id="svc-duree" value="${ex?.duree||''}"></div></div>`,
     `<button class="btn btn-outline" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveService(${key?`'${key}'`:'null'})">Sauver</button>`);
 };
-window.saveService = async (key) => { const btn = event.target.closest ? event.target.closest('button') : event.target; if(btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; await apiPost('saveService', { id: key, nom: document.getElementById('svc-nom').value.trim(), tarif: Number(document.getElementById('svc-tarif').value), duree: Number(document.getElementById('svc-duree').value) }); closeModal(); syncAndRender(); };
-window.deleteService = async (key) => { if (confirm('Supprimer ?')) { await apiPost('deleteService', { id: key }); syncAndRender(); } };
+window.saveService = async (key) => {
+  const btn = event.target.closest ? event.target.closest('button') : event.target; const old = btn ? btn.innerHTML : '';
+  if(btn) { btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; btn.disabled = true; }
+  try {
+    await apiPost('saveService', { id: key, nom: document.getElementById('svc-nom').value.trim(), tarif: Number(document.getElementById('svc-tarif').value), duree: Number(document.getElementById('svc-duree').value) });
+    closeModal(); syncAndRender();
+  } catch(e) { alert(e.message); if(btn) { btn.innerHTML = old; btn.disabled = false; } }
+};
+window.deleteService = async (key) => { if (confirm('Supprimer ?')) { try { await apiPost('deleteService', { id: key }); syncAndRender(); } catch(e) { alert(e.message); } } };
 
 function renderCoiffeursAdmin(){
   document.getElementById('coiffeurs-list').innerHTML = appData.coiffeurs.map(([key,c]) => `
@@ -1112,18 +1127,21 @@ window.openCoiffeurModal = (key) => {
     <div class="form-group"><label class="form-label">Téléverser une image</label><input type="file" class="form-input" id="cof-file" accept="image/*" onchange="handleFileUpload(this)"></div>    <input type="hidden" id="cof-img" value="${ex?.image||''}">`,
     `<button class="btn btn-outline" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveCoiffeur(${key?`'${key}'`:'null'}, this)">Sauver</button>`);
 };
-window.saveCoiffeur = async (key, btn) => { 
-  if(btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-  let imgUrl = document.getElementById('cof-img').value.trim();
-  const fileInput = document.getElementById('cof-file');
-  if (fileInput && fileInput.dataset.base64) {
-    const res = await apiPost('uploadImage', { filename: fileInput.dataset.filename, mimeType: fileInput.dataset.mimeType, base64: fileInput.dataset.base64 });
-    if (res && res.url) imgUrl = res.url;
-  }
-  await apiPost('saveCoiffeur', { id: key, nom: document.getElementById('cof-nom').value.trim(), specialite: document.getElementById('cof-spe').value.trim(), image: imgUrl }); 
-  closeModal(); syncAndRender(); 
+window.saveCoiffeur = async (key, btn) => {
+  const old = btn ? btn.innerHTML : '';
+  if(btn) { btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; btn.disabled = true; }
+  try {
+    let imgUrl = document.getElementById('cof-img').value.trim();
+    const fileInput = document.getElementById('cof-file');
+    if (fileInput && fileInput.dataset.base64) {
+      const res = await apiPost('uploadImage', { filename: fileInput.dataset.filename, mimeType: fileInput.dataset.mimeType, base64: fileInput.dataset.base64 });
+      if (res && res.url) imgUrl = res.url;
+    }
+    await apiPost('saveCoiffeur', { id: key, nom: document.getElementById('cof-nom').value.trim(), specialite: document.getElementById('cof-spe').value.trim(), image: imgUrl });
+    closeModal(); syncAndRender();
+  } catch(e) { alert(e.message); if(btn) { btn.innerHTML = old; btn.disabled = false; } }
 };
-window.deleteCoiffeur = async (key) => { if (confirm('Supprimer ?')) { await apiPost('deleteCoiffeur', { id: key }); syncAndRender(); } };
+window.deleteCoiffeur = async (key) => { if (confirm('Supprimer ?')) { try { await apiPost('deleteCoiffeur', { id: key }); syncAndRender(); } catch(e) { alert(e.message); } } };
 
 function renderGalerieAdmin(){
   document.getElementById('galerie-list').innerHTML = appData.galerie.map(([key,g]) => `
@@ -1131,18 +1149,21 @@ function renderGalerieAdmin(){
     <button class="btn btn-danger btn-sm" style="position:absolute; top:8px; right:8px; padding:4px 8px;" onclick="deleteGalerie('${key}')"><i class="fa-solid fa-trash"></i></button></div>`).join('');
 }
 window.openGalerieModal = () => { openModal('Photo', `<div class="form-group"><label class="form-label">Téléverser une image</label><input type="file" class="form-input" id="gal-file" accept="image/*" onchange="handleFileUpload(this)"></div><input type="hidden" id="gal-url" value="">`, `<button class="btn btn-outline" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveGalerie(this)">Sauver</button>`); };
-window.saveGalerie = async (btn) => { 
-  if(btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-  let url = document.getElementById('gal-url').value.trim();
-  const fileInput = document.getElementById('gal-file');
-  if (fileInput && fileInput.dataset.base64) {
-    const res = await apiPost('uploadImage', { filename: fileInput.dataset.filename, mimeType: fileInput.dataset.mimeType, base64: fileInput.dataset.base64 });
-    if (res && res.url) url = res.url;
-  }
-  await apiPost('saveGalerie', { url: url }); 
-  closeModal(); syncAndRender(); 
+window.saveGalerie = async (btn) => {
+  const old = btn ? btn.innerHTML : '';
+  if(btn) { btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; btn.disabled = true; }
+  try {
+    let url = document.getElementById('gal-url').value.trim();
+    const fileInput = document.getElementById('gal-file');
+    if (fileInput && fileInput.dataset.base64) {
+      const res = await apiPost('uploadImage', { filename: fileInput.dataset.filename, mimeType: fileInput.dataset.mimeType, base64: fileInput.dataset.base64 });
+      if (res && res.url) url = res.url;
+    }
+    await apiPost('saveGalerie', { url: url });
+    closeModal(); syncAndRender();
+  } catch(e) { alert(e.message); if(btn) { btn.innerHTML = old; btn.disabled = false; } }
 };
-window.deleteGalerie = async (key) => { if (confirm('Supprimer ?')) { await apiPost('deleteGalerie', { id: key }); syncAndRender(); } };
+window.deleteGalerie = async (key) => { if (confirm('Supprimer ?')) { try { await apiPost('deleteGalerie', { id: key }); syncAndRender(); } catch(e) { alert(e.message); } } };
 
 function fillSettingsForm(){
   const s = appData.settings;
@@ -1172,10 +1193,12 @@ window.saveSettings = async () => {
     aboutTitle: document.getElementById('set-about-title').value.trim(), aboutText: document.getElementById('set-about-text').value.trim(),
     footerText: document.getElementById('set-footer').value.trim()
   };
-  await apiPost('saveSettings', { settings: payload });
-  btn.innerHTML = '<i class="fa-solid fa-check"></i> Enregistré';
-  setTimeout(() => btn.innerHTML = old, 1500);
-  syncAndRender();
+  try {
+    await apiPost('saveSettings', { settings: payload });
+    btn.innerHTML = '<i class="fa-solid fa-check"></i> Enregistré';
+    setTimeout(() => btn.innerHTML = old, 1500);
+    syncAndRender();
+  } catch(e) { alert(e.message); btn.innerHTML = old; }
 };
 
 renderBookingStep();
