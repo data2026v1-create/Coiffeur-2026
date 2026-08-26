@@ -90,12 +90,12 @@ body.light-mode .service-card.selected .chk i { color: #fff; }
 .barber-card:hover{border-color:var(--gold);}
 .barber-card.selected{border-color:var(--gold);background:var(--gold-dim);}
 .barber-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-light));display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-family:var(--font-display);font-weight:700;color:#fff;font-size:1.3rem;overflow:hidden;}
-.barber-avatar img{width:100%;height:100%;object-fit:cover;}
+.barber-avatar img{width:100%;height:100%;object-fit:contain;}
 
 /* gallery */
 .gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin:30px 0;}
 .gallery-item{aspect-ratio:1;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);position:relative;background:var(--bg-elev);}
-.gallery-item img{width:100%;height:100%;object-fit:cover;transition:transform .3s;}
+.gallery-item img{width:100%;height:100%;object-fit:contain;transition:transform .3s;}
 .gallery-item:hover img{transform:scale(1.05);}
 .gallery-admin-item .gallery-item{margin-bottom:8px;}
 .about-section{margin:60px 0 30px;padding:40px;background:var(--card);border-radius:var(--radius);border:1px solid var(--border);text-align:center;}
@@ -536,7 +536,7 @@ document.getElementById('lang-btn').textContent = currentLang === 'fr' ? 'AR' : 
 applyTranslations();
 
 // --- APP DATA LOGIC ---
-const API_URL = 'https://script.google.com/macros/s/AKfycbz3CAHPLZqk5jD6CU8UlTc6ZS7Ad99MsWvU7Oi85y0xaWOx9Ycsch0gDl4mj5oZm6_c/exec'; 
+const API_URL = 'https://script.google.com/macros/s/AKfycbyRNpQu941yTO_a4C4TUcgDbIYl3WXC9-U9OXwjSMOZvxy--NoCEyMgLlTp254H6zpd/exec'; 
 const POLL_MS = 5000;
 
 const DEFAULT_SETTINGS = { nomSalon: 'Barber Pro DZ', adresse: '', telephone: '', devise: 'DA', ouverture: '09:00', fermeture: '20:00', dureeSlot: 30, joursFermeture: [], aboutTitle: 'À propos de notre salon', aboutText: 'Bienvenue chez Barber Pro DZ, votre salon de coiffure de référence.', footerText: '© 2026 Barber Pro DZ. Tous droits réservés.' };
@@ -582,6 +582,18 @@ function formatTimeSetting(val, defaultVal) {
   return defaultVal;
 }
 
+function formatImageUrl(url) {
+  if (!url) return '';
+  let str = String(url).trim();
+  if (str.includes('drive.google.com')) {
+    const match = str.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (match && match[1]) {
+      return 'https://drive.google.com/uc?id=' + match[1];
+    }
+  }
+  return str;
+}
+
 function normalizeData(raw){
   if (!raw || typeof raw !== 'object') raw = {};
   const getVal = (obj, ...keys) => {
@@ -597,8 +609,8 @@ function normalizeData(raw){
   };
 
   const services = (raw.services||[]).map(r => [String(getVal(r,'id')||''), { nom: getVal(r,'nom')||'', tarif: Number(getVal(r,'tarif', 'prix'))||0, duree: Number(getVal(r,'duree', 'temps'))||0 }]);
-  const coiffeurs = (raw.coiffeurs||[]).map(r => [String(getVal(r,'id')||''), { nom: getVal(r,'nom')||'', specialite: getVal(r,'specialite', 'specialites')||'', image: (getVal(r,'image', 'photo', 'url')||'') }]);
-  const galerie = (raw.galerie||[]).map(r => [String(getVal(r,'id')||''), { url: (getVal(r,'url', 'image', 'photo')||'') }]);
+  const coiffeurs = (raw.coiffeurs||[]).map(r => [String(getVal(r,'id')||''), { nom: getVal(r,'nom')||'', specialite: getVal(r,'specialite', 'specialites')||'', image: formatImageUrl(getVal(r,'image', 'photo', 'url')||'') }]);
+  const galerie = (raw.galerie||[]).map(r => [String(getVal(r,'id')||''), { url: formatImageUrl(getVal(r,'url', 'image', 'photo')||'') }]);
   const reservations = (raw.reservations||[]).map(r => {
     const statutFr = String(getVal(r,'statut', 'status')||'En attente').trim().toLowerCase();
     let dateVal = getVal(r,'date');
@@ -1086,7 +1098,7 @@ function renderCoiffeursAdmin(){
   document.getElementById('coiffeurs-list').innerHTML = appData.coiffeurs.map(([key,c]) => `
     <div class="list-card" style="display:flex;align-items:center;gap:15px;">
       <div style="width:45px;height:45px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-light));display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
-        ${c.image ? `<img src="${c.image}" style="width:100%;height:100%;object-fit:cover;" referrerpolicy="no-referrer">` : `<span style="font-weight:bold;color:#000;">${(c.nom||'?').charAt(0).toUpperCase()}</span>`}
+        ${c.image ? `<img src="${c.image}" style="width:100%;height:100%;object-fit:contain;" referrerpolicy="no-referrer">` : `<span style="font-weight:bold;color:#000;">${(c.nom||'?').charAt(0).toUpperCase()}</span>`}
       </div>
       <div style="flex:1;"><div style="font-weight:600;">${c.nom}</div><div class="meta">${c.specialite||'Barbier'}</div></div>
       <div style="display:flex;gap:6px;"><button class="btn btn-outline btn-sm" onclick='openCoiffeurModal(${JSON.stringify(key)})'><i class="fa-solid fa-pen"></i></button>
@@ -1105,7 +1117,7 @@ window.deleteCoiffeur = async (key) => { if (confirm('Supprimer ?')) { await api
 
 function renderGalerieAdmin(){
   document.getElementById('galerie-list').innerHTML = appData.galerie.map(([key,g]) => `
-    <div class="gallery-item" style="position:relative;"><img src="${g.url}" alt="Galerie" loading="lazy" referrerpolicy="no-referrer">
+    <div class="gallery-item" style="position:relative;"><img src="${g.url}" alt="Galerie" loading="lazy" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:contain;">
     <button class="btn btn-danger btn-sm" style="position:absolute; top:8px; right:8px; padding:4px 8px;" onclick="deleteGalerie('${key}')"><i class="fa-solid fa-trash"></i></button></div>`).join('');
 }
 window.openGalerieModal = () => { openModal('Photo', `<div class="form-group"><label class="form-label">URL de l'image</label><input class="form-input" id="gal-url"></div>`, `<button class="btn btn-outline" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveGalerie()">Sauver</button>`); };
