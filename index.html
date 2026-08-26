@@ -536,7 +536,7 @@ document.getElementById('lang-btn').textContent = currentLang === 'fr' ? 'AR' : 
 applyTranslations();
 
 // --- APP DATA LOGIC ---
-const API_URL = 'https://script.google.com/macros/s/AKfycbyRNpQu941yTO_a4C4TUcgDbIYl3WXC9-U9OXwjSMOZvxy--NoCEyMgLlTp254H6zpd/exec'; 
+const API_URL = 'https://script.google.com/macros/s/AKfycbwVJVa3ry_9zEoD-Of3RMEa2E8JXRFvOahwKuAFHiv_FyXVBkZAgAu3EGwuTiyd3TIb/exec'; 
 const POLL_MS = 5000;
 
 const DEFAULT_SETTINGS = { nomSalon: 'Barber Pro DZ', adresse: '', telephone: '', devise: 'DA', ouverture: '09:00', fermeture: '20:00', dureeSlot: 30, joursFermeture: [], aboutTitle: 'À propos de notre salon', aboutText: 'Bienvenue chez Barber Pro DZ, votre salon de coiffure de référence.', footerText: '© 2026 Barber Pro DZ. Tous droits réservés.' };
@@ -997,7 +997,7 @@ async function submitReservation(){
   try {
     const total = booking.services.reduce((s,x)=>s+x.tarif,0);
     const serviceStr = booking.services.map(s => s.nom).join(' + ');
-    await apiPost('createReservation', { nom: booking.nom, tel: booking.tel, service: serviceStr, coiffeur: booking.coiffeurNom, date: booking.date, heure: booking.heure, prix: total });
+    await apiPost('addReservation', { nom: booking.nom, tel: booking.tel, services: booking.services, coiffeurNom: booking.coiffeurNom, date: booking.date, heure: booking.heure, total: total });
     document.getElementById('c-step-5').classList.add('masque');
     document.getElementById('c-step-success').classList.remove('masque');
     document.getElementById('success-ref').textContent = t('successSub');
@@ -1067,7 +1067,7 @@ function renderReservationsTable(){
   tbody.innerHTML = rows.length ? rows.map(([k,r]) => rowHtml(r, true, k)).join('') : `<tr><td colspan="7" class="empty-row">Aucune réservation</td></tr>`;
 }
 
-window.updateStatus = async (id, status) => { await apiPost('updateReservationStatus', { id, statut: STATUT_CODE_TO_FR[status] }); syncAndRender(); };
+window.updateStatus = async (id, status) => { await apiPost('updateStatut', { id, statut: STATUT_CODE_TO_FR[status] }); syncAndRender(); };
 window.deleteResa = async (id) => { if (confirm('Supprimer ?')) { await apiPost('deleteReservation', { id }); syncAndRender(); } };
 window.exportData = () => {
   const header = ['Client','Tel','Services','Coiffeur','Date','Heure','Total','Statut'];
@@ -1091,7 +1091,7 @@ window.openServiceModal = (key) => {
     <div class="form-group"><label class="form-label">Durée (min)</label><input type="number" class="form-input" id="svc-duree" value="${ex?.duree||''}"></div></div>`,
     `<button class="btn btn-outline" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveService(${key?`'${key}'`:'null'})">Sauver</button>`);
 };
-window.saveService = async (key) => { await apiPost('saveService', { data: { id: key, nom: document.getElementById('svc-nom').value.trim(), tarif: Number(document.getElementById('svc-tarif').value), duree: Number(document.getElementById('svc-duree').value) } }); closeModal(); syncAndRender(); };
+window.saveService = async (key) => { const btn = event.target; if(btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; await apiPost('saveService', { id: key, nom: document.getElementById('svc-nom').value.trim(), tarif: Number(document.getElementById('svc-tarif').value), duree: Number(document.getElementById('svc-duree').value) }); closeModal(); syncAndRender(); };
 window.deleteService = async (key) => { if (confirm('Supprimer ?')) { await apiPost('deleteService', { id: key }); syncAndRender(); } };
 
 function renderCoiffeursAdmin(){
@@ -1109,10 +1109,21 @@ window.openCoiffeurModal = (key) => {
   const ex = key ? appData.coiffeurs.find(([k])=>k===key)?.[1] : null;
   openModal(ex ? 'Modifier' : 'Nouveau', `<div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="cof-nom" value="${ex?.nom||''}"></div>
     <div class="form-group"><label class="form-label">Spécialité</label><input class="form-input" id="cof-spe" value="${ex?.specialite||''}"></div>
-    <div class="form-group"><label class="form-label">URL Image</label><input class="form-input" id="cof-img" value="${ex?.image||''}"></div>`,
-    `<button class="btn btn-outline" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveCoiffeur(${key?`'${key}'`:'null'})">Sauver</button>`);
+    <div class="form-group"><label class="form-label">Photo (Upload)</label><input type="file" class="form-input" id="cof-file" accept="image/*" onchange="handleFileUpload(this)"></div>
+    <div class="form-group"><label class="form-label">OU URL Image (Lien Web)</label><input class="form-input" id="cof-img" value="${ex?.image||''}"></div>`,
+    `<button class="btn btn-outline" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveCoiffeur(${key?`'${key}'`:'null'}, this)">Sauver</button>`);
 };
-window.saveCoiffeur = async (key) => { await apiPost('saveCoiffeur', { data: { id: key, nom: document.getElementById('cof-nom').value.trim(), specialite: document.getElementById('cof-spe').value.trim(), image: document.getElementById('cof-img').value.trim() } }); closeModal(); syncAndRender(); };
+window.saveCoiffeur = async (key, btn) => { 
+  if(btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+  let imgUrl = document.getElementById('cof-img').value.trim();
+  const fileInput = document.getElementById('cof-file');
+  if (fileInput && fileInput.dataset.base64) {
+    const res = await apiPost('uploadImage', { filename: fileInput.dataset.filename, mimeType: fileInput.dataset.mimeType, base64: fileInput.dataset.base64 });
+    if (res && res.url) imgUrl = res.url;
+  }
+  await apiPost('saveCoiffeur', { id: key, nom: document.getElementById('cof-nom').value.trim(), specialite: document.getElementById('cof-spe').value.trim(), image: imgUrl }); 
+  closeModal(); syncAndRender(); 
+};
 window.deleteCoiffeur = async (key) => { if (confirm('Supprimer ?')) { await apiPost('deleteCoiffeur', { id: key }); syncAndRender(); } };
 
 function renderGalerieAdmin(){
@@ -1120,8 +1131,18 @@ function renderGalerieAdmin(){
     <div class="gallery-item" style="position:relative;"><img src="${g.url}" alt="Galerie" loading="lazy" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:contain;">
     <button class="btn btn-danger btn-sm" style="position:absolute; top:8px; right:8px; padding:4px 8px;" onclick="deleteGalerie('${key}')"><i class="fa-solid fa-trash"></i></button></div>`).join('');
 }
-window.openGalerieModal = () => { openModal('Photo', `<div class="form-group"><label class="form-label">URL de l'image</label><input class="form-input" id="gal-url"></div>`, `<button class="btn btn-outline" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveGalerie()">Sauver</button>`); };
-window.saveGalerie = async () => { await apiPost('saveGalerie', { data: { url: document.getElementById('gal-url').value.trim() } }); closeModal(); syncAndRender(); };
+window.openGalerieModal = () => { openModal('Photo', `<div class="form-group"><label class="form-label">Téléverser une image</label><input type="file" class="form-input" id="gal-file" accept="image/*" onchange="handleFileUpload(this)"></div><div class="form-group"><label class="form-label">OU URL de l'image (Lien Web)</label><input class="form-input" id="gal-url"></div>`, `<button class="btn btn-outline" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveGalerie(this)">Sauver</button>`); };
+window.saveGalerie = async (btn) => { 
+  if(btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+  let url = document.getElementById('gal-url').value.trim();
+  const fileInput = document.getElementById('gal-file');
+  if (fileInput && fileInput.dataset.base64) {
+    const res = await apiPost('uploadImage', { filename: fileInput.dataset.filename, mimeType: fileInput.dataset.mimeType, base64: fileInput.dataset.base64 });
+    if (res && res.url) url = res.url;
+  }
+  await apiPost('saveGalerie', { url: url }); 
+  closeModal(); syncAndRender(); 
+};
 window.deleteGalerie = async (key) => { if (confirm('Supprimer ?')) { await apiPost('deleteGalerie', { id: key }); syncAndRender(); } };
 
 function fillSettingsForm(){
@@ -1152,7 +1173,7 @@ window.saveSettings = async () => {
     aboutTitle: document.getElementById('set-about-title').value.trim(), aboutText: document.getElementById('set-about-text').value.trim(),
     footerText: document.getElementById('set-footer').value.trim()
   };
-  await apiPost('saveParametres', { data: payload });
+  await apiPost('saveSettings', { settings: payload });
   btn.innerHTML = '<i class="fa-solid fa-check"></i> Enregistré';
   setTimeout(() => btn.innerHTML = old, 1500);
   syncAndRender();
