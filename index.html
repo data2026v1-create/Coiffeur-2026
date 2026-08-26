@@ -547,7 +547,7 @@ let appData = { services: [], coiffeurs: [], reservations: [], galerie: [], sett
 let firstSync = true;
 let booking = { step: 1, services: [], coiffeurId: null, coiffeurNom: null, date: null, heure: null, nom: '', tel: '' };
 
-async function apiGet(){ const res = await fetch(API_URL); return res.json(); }
+async function apiGet(){ const res = await fetch(API_URL + (API_URL.includes('?') ? '&' : '?') + 't=' + new Date().getTime()); return res.json(); }
 async function apiPost(action, payload){
   const res = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action, ...payload }) });
   return res.json();
@@ -1091,7 +1091,7 @@ window.openServiceModal = (key) => {
     <div class="form-group"><label class="form-label">Durée (min)</label><input type="number" class="form-input" id="svc-duree" value="${ex?.duree||''}"></div></div>`,
     `<button class="btn btn-outline" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveService(${key?`'${key}'`:'null'})">Sauver</button>`);
 };
-window.saveService = async (key) => { const btn = event.target; if(btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; await apiPost('saveService', { id: key, nom: document.getElementById('svc-nom').value.trim(), tarif: Number(document.getElementById('svc-tarif').value), duree: Number(document.getElementById('svc-duree').value) }); closeModal(); syncAndRender(); };
+window.saveService = async (key) => { const btn = event.target.closest ? event.target.closest('button') : event.target; if(btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; await apiPost('saveService', { id: key, nom: document.getElementById('svc-nom').value.trim(), tarif: Number(document.getElementById('svc-tarif').value), duree: Number(document.getElementById('svc-duree').value) }); closeModal(); syncAndRender(); };
 window.deleteService = async (key) => { if (confirm('Supprimer ?')) { await apiPost('deleteService', { id: key }); syncAndRender(); } };
 
 function renderCoiffeursAdmin(){
@@ -1109,8 +1109,7 @@ window.openCoiffeurModal = (key) => {
   const ex = key ? appData.coiffeurs.find(([k])=>k===key)?.[1] : null;
   openModal(ex ? 'Modifier' : 'Nouveau', `<div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="cof-nom" value="${ex?.nom||''}"></div>
     <div class="form-group"><label class="form-label">Spécialité</label><input class="form-input" id="cof-spe" value="${ex?.specialite||''}"></div>
-    <div class="form-group"><label class="form-label">Photo (Upload)</label><input type="file" class="form-input" id="cof-file" accept="image/*" onchange="handleFileUpload(this)"></div>
-    <div class="form-group"><label class="form-label">OU URL Image (Lien Web)</label><input class="form-input" id="cof-img" value="${ex?.image||''}"></div>`,
+    <div class="form-group"><label class="form-label">Téléverser une image</label><input type="file" class="form-input" id="cof-file" accept="image/*" onchange="handleFileUpload(this)"></div>    <input type="hidden" id="cof-img" value="${ex?.image||''}">`,
     `<button class="btn btn-outline" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveCoiffeur(${key?`'${key}'`:'null'}, this)">Sauver</button>`);
 };
 window.saveCoiffeur = async (key, btn) => { 
@@ -1131,7 +1130,7 @@ function renderGalerieAdmin(){
     <div class="gallery-item" style="position:relative;"><img src="${g.url}" alt="Galerie" loading="lazy" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:contain;">
     <button class="btn btn-danger btn-sm" style="position:absolute; top:8px; right:8px; padding:4px 8px;" onclick="deleteGalerie('${key}')"><i class="fa-solid fa-trash"></i></button></div>`).join('');
 }
-window.openGalerieModal = () => { openModal('Photo', `<div class="form-group"><label class="form-label">Téléverser une image</label><input type="file" class="form-input" id="gal-file" accept="image/*" onchange="handleFileUpload(this)"></div><div class="form-group"><label class="form-label">OU URL de l'image (Lien Web)</label><input class="form-input" id="gal-url"></div>`, `<button class="btn btn-outline" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveGalerie(this)">Sauver</button>`); };
+window.openGalerieModal = () => { openModal('Photo', `<div class="form-group"><label class="form-label">Téléverser une image</label><input type="file" class="form-input" id="gal-file" accept="image/*" onchange="handleFileUpload(this)"></div><input type="hidden" id="gal-url" value="">`, `<button class="btn btn-outline" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveGalerie(this)">Sauver</button>`); };
 window.saveGalerie = async (btn) => { 
   if(btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
   let url = document.getElementById('gal-url').value.trim();
