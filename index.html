@@ -536,8 +536,38 @@ document.getElementById('lang-btn').textContent = currentLang === 'fr' ? 'AR' : 
 applyTranslations();
 
 // --- APP DATA LOGIC ---
-const API_URL = 'https://script.google.com/macros/s/AKfycby8nbg6Ui3k6l-SRkAtiZ3VgxYdPCt66ql9Kuy_ilHoV-KcGUAU9oUqXbma93DbMjiu/exec'; 
-const POLL_MS = 5000;
+const API_URL = 'https://script.google.com/macros/s/AKfycbz5QvBBzDOHJ_UpWznL9l497HL3r5ZBCOpFTGhNFgDWJUPrVSR5U-0y5oL55DNP6z__/exec'; 
+const POLL_MS = 15000; // 15s au lieu de 5s : moins de charge sur Apps Script, moins de quota consommé, app plus fluide
+
+// Transforme une Response fetch() en JSON de façon sûre. Si Google renvoie
+// une page HTML (déploiement mal configuré, quota dépassé, session expirée)
+// au lieu du JSON attendu, on lève une erreur claire au lieu de planter avec
+// "Unexpected token '<', "<!DOCTYPE"... is not valid JSON".
+async function parseApiResponse_(res) {
+  const text = await res.text();
+  const trimmed = text.trim();
+  if (trimmed.startsWith('<')) {
+    throw new Error("Le serveur Google Sheets n'a pas répondu correctement (le lien de déploiement Apps Script a peut-être expiré ou n'est plus accessible \"Tout le monde\"). Réessaye dans un instant.");
+  }
+  try {
+    return JSON.parse(trimmed);
+  } catch (e) {
+    throw new Error('Réponse du serveur illisible. Réessaye dans un instant.');
+  }
+}
+
+async function apiGet(){
+  const res = await fetch(API_URL + (API_URL.includes('?') ? '&' : '?') + 't=' + new Date().getTime());
+  return parseApiResponse_(res);
+}
+async function apiPost(action, payload){
+  const res = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action, ...payload }) });
+  const json = await parseApiResponse_(res);
+  if (json && json.success === false) {
+    throw new Error(json.message || json.error || 'Une erreur est survenue côté serveur.');
+  }
+  return json;
+}
 
 const DEFAULT_SETTINGS = { nomSalon: 'Barber Pro DZ', adresse: '', telephone: '', devise: 'DA', ouverture: '09:00', fermeture: '20:00', dureeSlot: 30, joursFermeture: [], aboutTitle: 'À propos de notre salon', aboutText: 'Bienvenue chez Barber Pro DZ, votre salon de coiffure de référence.', footerText: '© 2026 Barber Pro DZ. Tous droits réservés.' };
 const STATUT_FR_TO_CODE = { 'en attente':'attente', 'confirmé':'confirme', 'confirme':'confirme', 'annulé':'annule', 'annule':'annule' };
@@ -546,16 +576,6 @@ const STATUT_CODE_TO_FR = { attente:'En attente', confirme:'Confirmé', annule:'
 let appData = { services: [], coiffeurs: [], reservations: [], galerie: [], settings: { ...DEFAULT_SETTINGS } };
 let firstSync = true;
 let booking = { step: 1, services: [], coiffeurId: null, coiffeurNom: null, date: null, heure: null, nom: '', tel: '' };
-
-async function apiGet(){ const res = await fetch(API_URL + (API_URL.includes('?') ? '&' : '?') + 't=' + new Date().getTime()); return res.json(); }
-async function apiPost(action, payload){
-  const res = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action, ...payload }) });
-  const json = await res.json();
-  if (json && json.success === false) {
-    throw new Error(json.message || json.error || 'Une erreur est survenue côté serveur.');
-  }
-  return json;
-}
 
 function parseFrDate(str){
   if (!str) return 0;
@@ -589,13 +609,31 @@ function formatTimeSetting(val, defaultVal) {
 function formatImageUrl(url) {
   if (!url) return '';
   let str = String(url).trim();
-  if (str.includes('drive.google.com')) {
-    const match = str.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (str.includes('drive.google.com') || str.includes('googleusercontent.com')) {
+    const match = str.match(/\/d\/([a-zA-Z0-9_-]+)/) || str.match(/[?&]id=([a-zA-Z0-9_-]+)/);
     if (match && match[1]) {
-      return 'https://drive.google.com/uc?id=' + match[1];
+      // Format lh3 (CDN Google Photos/Drive) : s'affiche de façon beaucoup plus
+      // fiable en <img> que "drive.google.com/uc?id=", qui est souvent bloqué
+      // (icône cassée) et plus lent. "=w400" redimensionne côté serveur pour
+      // alléger le poids transféré (perf).
+      return 'https://lh3.googleusercontent.com/d/' + match[1] + '=w400';
     }
   }
   return str;
+}
+
+// Construit un attribut onerror pour une <img> pointant vers une image Drive :
+// si le lien rapide (lh3) échoue, on retente le lien drive.google.com/uc
+// classique, puis en dernier recours une image de remplacement. Evite les
+// icônes cassées à l'écran au lieu de laisser échouer silencieusement.
+function driveImgFallbackChain(originalUrl, placeholderUrl) {
+  const match = String(originalUrl || '').match(/\/d\/([a-zA-Z0-9_-]+)/) || String(originalUrl || '').match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  const safePlaceholder = String(placeholderUrl).replace(/'/g, "\\'");
+  if (match && match[1]) {
+    const altUrl = `https://drive.google.com/uc?export=view&id=${match[1]}`;
+    return `data-fallback="${altUrl}" onerror="if(this.dataset.fallback){this.src=this.dataset.fallback;this.dataset.fallback='';}else{this.onerror=null;this.src='${safePlaceholder}';}"`;
+  }
+  return `onerror="this.onerror=null;this.src='${safePlaceholder}';"`;
 }
 
 function normalizeData(raw){
@@ -655,30 +693,48 @@ function normalizeData(raw){
   return { services, coiffeurs, galerie, reservations, settings };
 }
 
-async function syncAndRender(){
+let lastDataSnapshot = null;
+async function syncAndRender(force){
   try {
     const raw = await apiGet();
-    appData = normalizeData(raw);
+    const normalized = normalizeData(raw);
     document.getElementById('status-cloud').innerHTML = `<span style="color:var(--success);">● ${t('syncActive')}</span>`;
+    const snapshot = JSON.stringify(normalized);
+    const changed = snapshot !== lastDataSnapshot;
+    appData = normalized;
+    if (changed || force) {
+      lastDataSnapshot = snapshot;
+      applyBranding();
+      renderClientServices();
+      renderClientCoiffeurs();
+      renderClientGalerie();
+      renderDashboard();
+      renderReservationsTable();
+      renderServicesAdmin();
+      renderCoiffeursAdmin();
+      renderGalerieAdmin();
+    }
   } catch (err) {
-    document.getElementById('status-cloud').innerHTML = `<span style="color:var(--danger);">● ${t('syncOffline')}</span>`;
+    document.getElementById('status-cloud').innerHTML = `<span style="color:var(--danger);" title="${String(err.message||'').replace(/"/g,'&quot;')}">● ${t('syncOffline')}</span>`;
   } finally {
-    applyBranding();
-    renderClientServices();
-    renderClientCoiffeurs();
-    renderClientGalerie();
-    renderDashboard();
-    renderReservationsTable();
-    renderServicesAdmin();
-    renderCoiffeursAdmin();
-    renderGalerieAdmin();
     if (firstSync) { fillSettingsForm(); firstSync = false; }
     document.getElementById('loader').classList.add('masque');
   }
 }
 
 syncAndRender();
-setInterval(syncAndRender, POLL_MS);
+let pollTimer = setInterval(syncAndRender, POLL_MS);
+// Pause la synchro automatique quand l'onglet est en arrière-plan : évite de
+// bombarder Apps Script de requêtes inutiles (quota, lenteur) pendant que
+// personne ne regarde l'écran, et resynchronise dès le retour sur l'onglet.
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    clearInterval(pollTimer);
+  } else {
+    syncAndRender();
+    pollTimer = setInterval(syncAndRender, POLL_MS);
+  }
+});
 
 function money(n){ return `${n} ${appData.settings.devise || 'DA'}`; }
 
@@ -776,7 +832,7 @@ function renderClientCoiffeurs(){
   </div>`;
   const cards = appData.coiffeurs.map(([key, c]) => {
     const fallbackUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(c.nom||'Barber')}&background=c9a227&color=000`;
-    const avatarContent = c.image ? `<img src="${c.image}" alt="${c.nom}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${fallbackUrl}'">` : `${(c.nom||'?').charAt(0).toUpperCase()}`;
+    const avatarContent = c.image ? `<img src="${c.image}" alt="${c.nom}" loading="lazy" referrerpolicy="no-referrer" ${driveImgFallbackChain(c.image, fallbackUrl)}>` : `${(c.nom||'?').charAt(0).toUpperCase()}`;
     return `<div class="barber-card ${booking.coiffeurId===key?'selected':''}" onclick="selectCoiffeur('${key}','${(c.nom||'').replace(/'/g,"\\'")}')">
       <div class="barber-avatar">${avatarContent}</div>
       <div style="font-weight:600;">${c.nom}</div>
@@ -796,7 +852,7 @@ function renderClientGalerie(){
   const section = document.getElementById('client-gallery-section');
   if (appData.galerie && appData.galerie.length > 0) {
     section.classList.remove('masque');
-    el.innerHTML = appData.galerie.map(([k, g]) => `<div class="gallery-item"><img src="${g.url}" alt="Galerie" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1599351431202-1e0f0137899a?q=80&w=400&auto=format&fit=crop'"></div>`).join('');
+    el.innerHTML = appData.galerie.map(([k, g]) => `<div class="gallery-item"><img src="${g.url}" alt="Galerie" loading="lazy" referrerpolicy="no-referrer" ${driveImgFallbackChain(g.url, 'https://images.unsplash.com/photo-1599351431202-1e0f0137899a?q=80&w=400&auto=format&fit=crop')}></div>`).join('');
   } else { section.classList.add('masque'); }
 }
 
@@ -1113,7 +1169,7 @@ function renderCoiffeursAdmin(){
   document.getElementById('coiffeurs-list').innerHTML = appData.coiffeurs.map(([key,c]) => `
     <div class="list-card" style="display:flex;align-items:center;gap:15px;">
       <div style="width:45px;height:45px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-light));display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
-        ${c.image ? `<img src="${c.image}" style="width:100%;height:100%;object-fit:contain;" referrerpolicy="no-referrer">` : `<span style="font-weight:bold;color:#000;">${(c.nom||'?').charAt(0).toUpperCase()}</span>`}
+        ${c.image ? `<img src="${c.image}" style="width:100%;height:100%;object-fit:contain;" loading="lazy" referrerpolicy="no-referrer" ${driveImgFallbackChain(c.image, `https://ui-avatars.com/api/?name=${encodeURIComponent(c.nom||'Barber')}&background=c9a227&color=000`)}>` : `<span style="font-weight:bold;color:#000;">${(c.nom||'?').charAt(0).toUpperCase()}</span>`}
       </div>
       <div style="flex:1;"><div style="font-weight:600;">${c.nom}</div><div class="meta">${c.specialite||'Barbier'}</div></div>
       <div style="display:flex;gap:6px;"><button class="btn btn-outline btn-sm" onclick='openCoiffeurModal(${JSON.stringify(key)})'><i class="fa-solid fa-pen"></i></button>
@@ -1145,7 +1201,7 @@ window.deleteCoiffeur = async (key) => { if (confirm('Supprimer ?')) { try { awa
 
 function renderGalerieAdmin(){
   document.getElementById('galerie-list').innerHTML = appData.galerie.map(([key,g]) => `
-    <div class="gallery-item" style="position:relative;"><img src="${g.url}" alt="Galerie" loading="lazy" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:contain;">
+    <div class="gallery-item" style="position:relative;"><img src="${g.url}" alt="Galerie" loading="lazy" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:contain;" ${driveImgFallbackChain(g.url, 'https://images.unsplash.com/photo-1599351431202-1e0f0137899a?q=80&w=400&auto=format&fit=crop')}>
     <button class="btn btn-danger btn-sm" style="position:absolute; top:8px; right:8px; padding:4px 8px;" onclick="deleteGalerie('${key}')"><i class="fa-solid fa-trash"></i></button></div>`).join('');
 }
 window.openGalerieModal = () => { openModal('Photo', `<div class="form-group"><label class="form-label">Téléverser une image</label><input type="file" class="form-input" id="gal-file" accept="image/*" onchange="handleFileUpload(this)"></div><input type="hidden" id="gal-url" value="">`, `<button class="btn btn-outline" onclick="closeModal()">Annuler</button><button class="btn btn-primary" onclick="saveGalerie(this)">Sauver</button>`); };
